@@ -1,8 +1,8 @@
-import { doc, getDoc } from "firebase/firestore";
+import { checkAdminUid } from "~/composables/useAdminAccess";
 
 /**
  * ログイン済みかつ Firestore `admin_users/{uid}` があること。
- * `definePageMeta({ middleware: ['admin'] })` が付いたページでのみ実行される。
+ * 一般ユーザーは管理ログインへ誘導（`redirect` で戻り先を保持）。
  */
 export default defineNuxtRouteMiddleware(async (to) => {
   const config = useRuntimeConfig().public;
@@ -26,26 +26,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
     });
   }
 
-  const db = nuxtApp.$firestoreDb;
-  if (!db) {
-    return navigateTo("/");
-  }
-
   const adminGateReason = useState<"not_admin" | "firestore_error" | null>(
     "admin-gate-reason",
     () => null,
   );
 
-  try {
-    const snap = await getDoc(doc(db, "admin_users", user.value.uid));
-    if (!snap.exists()) {
-      adminGateReason.value = "not_admin";
-      return navigateTo("/");
-    }
-    adminGateReason.value = null;
-  } catch {
-    // ルール未デプロイ・admin_users 未整備などで permission-denied になり得る。未捕捉だと Nuxt が 500 になる。
+  const result = await checkAdminUid(user.value.uid);
+  if (result === "not_admin") {
+    adminGateReason.value = "not_admin";
+    return navigateTo({
+      path: "/login",
+      query: { redirect: to.fullPath },
+    });
+  }
+  if (result === "error") {
     adminGateReason.value = "firestore_error";
     return navigateTo("/");
   }
+  adminGateReason.value = null;
 });

@@ -17,6 +17,50 @@
   padding: 10px 16px;
 }
 
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.site-bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.site-bell-btn:active {
+  background: var(--surface-pressed);
+}
+
+.site-bell-btn__icon {
+  display: block;
+}
+
+.site-bell-btn__dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  border: 1.5px solid var(--surface);
+}
+
 .site-logo {
   display: inline-flex;
   align-items: center;
@@ -245,4 +289,170 @@
 
 .site-nav-auth__logout:active {
   background: var(--surface-pressed);
+}
+
+/* トレーナーコメント（ベルから開くパネル）— ドロワーより前面 */
+.site-comments-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 115;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.site-comments-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.site-comments-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 120;
+  width: min(380px, 100vw);
+  max-width: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.12);
+  padding: calc(var(--safe-top) + 12px) 0 max(20px, var(--safe-bottom));
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.site-comments-panel.is-open {
+  transform: translateX(0);
+}
+
+.site-comments-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.site-comments-panel__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.site-comments-panel__close {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.site-comments-panel__close:active {
+  background: var(--surface-pressed);
+}
+
+.site-comments-panel__hint {
+  margin: 0;
+  padding: 10px 16px 12px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.site-comments-panel__error {
+  margin: 0 16px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #f0b4ae;
+}
+
+.site-comments-panel__loading,
+.site-comments-panel__empty {
+  margin: 0;
+  padding: 16px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.site-comments-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 16px;
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.site-comments-panel__item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.site-comments-panel__item--unread {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.site-comments-panel__item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.site-comments-panel__date {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.site-comments-panel__read-badge {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.site-comments-panel__item--unread .site-comments-panel__read-badge {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.site-comments-panel__text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

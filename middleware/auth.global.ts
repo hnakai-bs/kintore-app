@@ -5,11 +5,23 @@ function safeInternalPath(path: unknown, fallback = "/") {
   return path;
 }
 
+import { checkAdminUid } from "~/composables/useAdminAccess";
+
 function redirectQueryValue(
   q: string | string[] | undefined | null,
 ): string {
   if (q == null) return "";
   return typeof q === "string" ? q : q[0] ?? "";
+}
+
+/** `/admin` へ行きたいが現ユーザーが管理者でない → ログイン画面に留まる */
+async function blockAutoRedirectFromLoginToAdmin(
+  redirectPath: string,
+  uid: string,
+): Promise<boolean> {
+  if (!redirectPath.startsWith("/admin")) return false;
+  const result = await checkAdminUid(uid);
+  return result !== "admin";
 }
 
 /**
@@ -42,6 +54,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (to.path === "/login") {
     if (user.value) {
       const path = safeInternalPath(to.query.redirect, "/");
+      if (await blockAutoRedirectFromLoginToAdmin(path, user.value.uid)) {
+        return;
+      }
       return navigateTo(path);
     }
     return;

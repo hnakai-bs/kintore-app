@@ -84,6 +84,13 @@
   color: #991b1b;
 }
 
+.auth-panel--warn {
+  margin-bottom: 12px;
+  border: 1px solid #fcd34d;
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+  color: #78350f;
+}
+
 .auth-panel__text {
   margin: 0;
 }

@@ -51,10 +51,6 @@ function extractFirestoreConsoleUrl(message: string): string | null {
   return m ? m[0] : null;
 }
 
-function goUserDetail(uid: string) {
-  void navigateTo(`/admin/users/${uid}`);
-}
-
 onMounted(async () => {
   loading.value = true;
   errorMessage.value = "";
@@ -139,8 +135,10 @@ onMounted(async () => {
   <main class="admin-page">
     <h1 class="page-title">ユーザー一覧</h1>
     <p class="admin-page__lead">
-      プロフィールを保存したユーザが <code>userDirectory</code> に登録され、ここに表示されます（初回はプロフィール画面を開くか保存すると登録されます）。      ニックネームはプロフィールの <code>nickname</code> です。メールアドレスは Firestore に無いため UID
-      でも識別できます。行をクリックするとユーザー詳細（コンディション・トレーニングログ）を開きます。
+      プロフィールを保存したユーザが <code>userDirectory</code> に登録され、ここに表示されます（初回はプロフィール画面を開くか保存すると登録されます）。
+      ニックネームはプロフィールの <code>nickname</code> です。メールは Firestore に無いため UID で識別します。
+      新規の Authentication ユーザーは <strong>Firebase Console</strong> または <code>npm run admin:create</code> で作成してください。
+      <strong>詳細</strong>から各ユーザーのログを閲覧できます。
     </p>
 
     <p v-if="errorMessage" class="admin-page__error" role="alert">
@@ -177,20 +175,11 @@ onMounted(async () => {
               <th scope="col">身長</th>
               <th scope="col">体重</th>
               <th scope="col">体脂肪</th>
+              <th scope="col" class="admin-user-table__actions-head">操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="r in rows"
-              :key="r.uid"
-              class="admin-user-table__row--click"
-              tabindex="0"
-              role="link"
-              :aria-label="`ユーザー ${r.nickname} の詳細を開く`"
-              @click="goUserDetail(r.uid)"
-              @keydown.enter.prevent="goUserDetail(r.uid)"
-              @keydown.space.prevent="goUserDetail(r.uid)"
-            >
+            <tr v-for="r in rows" :key="r.uid">
               <td class="admin-user-table__mono">{{ r.uid }}</td>
               <td>{{ r.nickname }}</td>
               <td>
@@ -202,6 +191,14 @@ onMounted(async () => {
               <td>{{ r.height === "—" ? "—" : `${r.height} cm` }}</td>
               <td>{{ r.weight === "—" ? "—" : `${r.weight} kg` }}</td>
               <td>{{ r.bodyFat === "—" ? "—" : `${r.bodyFat} %` }}</td>
+              <td class="admin-user-table__actions">
+                <NuxtLink
+                  class="admin-table-btn admin-table-btn--detail"
+                  :to="`/admin/users/${r.uid}`"
+                >
+                  詳細
+                </NuxtLink>
+              </td>
             </tr>
           </tbody>
         </table>

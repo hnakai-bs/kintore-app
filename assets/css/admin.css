@@ -147,26 +147,43 @@ html.admin-ui body {
   color: var(--text-muted);
 }
 
-.admin-user-table__row--click {
+.admin-user-table__actions-head,
+.admin-user-table__actions {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.admin-user-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-table-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
   cursor: pointer;
-  transition:
-    background 0.18s ease,
-    box-shadow 0.18s ease;
+  touch-action: manipulation;
 }
 
-.admin-user-table__row--click:hover {
-  background: linear-gradient(90deg, #eff6ff 0%, #f0f9ff 100%);
-  box-shadow: inset 4px 0 0 #2563eb;
-}
-
-.admin-user-table__row--click:active {
-  background: #dbeafe;
-}
-
-.admin-user-table__row--click:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: -2px;
+.admin-table-btn--detail {
+  border-color: #2563eb;
+  color: #1d4ed8;
   background: #eff6ff;
+}
+
+.admin-table-btn:hover {
+  filter: brightness(0.97);
 }
 
 .admin-page__empty {
@@ -279,32 +296,9 @@ html.admin-ui body {
 }
 
 .admin-user-detail__title {
-  margin: 0 0 8px;
+  margin: 0 0 20px;
   font-size: 1.25rem;
-}
-
-.admin-user-detail__meta {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 16px;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-}
-
-.admin-user-detail__nick {
-  font-weight: 700;
-  color: var(--text);
-  font-size: 0.9375rem;
-}
-
-.admin-user-detail__uid {
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  line-height: 1.35;
 }
 
 .admin-user-detail__section {
@@ -355,6 +349,38 @@ html.admin-ui body {
   border: 1px solid var(--border);
 }
 
+.admin-user-detail__tabs--three {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.admin-user-detail__tabs--three .admin-user-detail__tab {
+  flex: 1 1 min(140px, 33.333%);
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+  padding: 10px 10px;
+  font-size: 0.75rem;
+}
+
+.admin-user-detail__tabs--four {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.admin-user-detail__tabs--four .admin-user-detail__tab {
+  flex: 1 1 min(112px, 25%);
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+  padding: 8px 8px;
+  font-size: 0.6875rem;
+}
+
 .admin-user-detail__tab {
   flex: 1 1 auto;
   min-width: 220px;
@@ -389,6 +415,289 @@ html.admin-ui body {
 
 .admin-user-detail__tab-panel {
   margin-top: 0;
+}
+
+/* 管理 — ユーザー向けコメント */
+.admin-user-comments-toolbar {
+  margin-bottom: 16px;
+}
+
+.admin-user-comments-toolbar__new {
+  padding: 10px 18px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+.admin-user-comments-toolbar__new:hover {
+  background: #1d4ed8;
+}
+
+.admin-user-comments-form__row {
+  margin-bottom: 14px;
+}
+
+.admin-user-comments-form__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.admin-user-comments-form__input,
+.admin-user-comments-form__textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.admin-user-comments-form__input--date {
+  max-width: 200px;
+}
+
+.admin-user-comments-form__textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.admin-user-comments-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-user-comments-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.admin-user-comments-table th,
+.admin-user-comments-table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-user-comments-table th {
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.admin-user-comments-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-user-comments-table__th-actions {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.admin-user-comments-table__date {
+  min-width: 140px;
+}
+
+.admin-user-comments-table__date-primary {
+  display: block;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.admin-user-comments-table__date-sub {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.admin-user-comments-table__edited {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.admin-user-comments-table__body {
+  max-width: 420px;
+}
+
+.admin-user-comments-table__preview {
+  display: block;
+  max-height: 6.5em;
+  overflow: auto;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.admin-user-comments-table__actions {
+  white-space: nowrap;
+}
+
+.admin-user-comments-table__edit-btn {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.admin-user-comments-table__edit-btn:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.admin-user-comments-load-more-wrap {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.admin-user-comments-load-more {
+  padding: 10px 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.admin-user-comments-load-more:hover:not(:disabled) {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.admin-user-comments-load-more:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-comment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.admin-comment-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 81;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.admin-comment-modal__panel {
+  width: 100%;
+  max-width: 440px;
+  max-height: min(90dvh, 640px);
+  overflow: auto;
+  padding: 20px 22px 22px;
+  pointer-events: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+}
+
+.admin-comment-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-comment-modal__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.admin-comment-modal__close {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-comment-modal__close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.admin-comment-modal__form {
+  margin: 0;
+}
+
+.admin-comment-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.admin-comment-modal__btn {
+  padding: 10px 18px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-comment-modal__btn--ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.admin-comment-modal__btn--primary {
+  border: none;
+  background: #2563eb;
+  color: #fff;
+}
+
+.admin-comment-modal__btn--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.admin-comment-modal__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* コンディション: 左寄せ・1週間/1ヶ月/期間指定は各セル約200px */

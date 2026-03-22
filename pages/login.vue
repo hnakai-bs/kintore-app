@@ -3,6 +3,8 @@ definePageMeta({
   layout: "auth",
 });
 
+import { checkAdminUid } from "~/composables/useAdminAccess";
+
 const route = useRoute();
 const {
   isConfigured,
@@ -26,6 +28,9 @@ function safeInternalPath(path: unknown, fallback = "/") {
 const redirectPath = computed(() => safeInternalPath(route.query.redirect, "/"));
 const isRedirectToAdmin = computed(() => redirectPath.value.startsWith("/admin"));
 
+/** ログイン済みだが管理者ではない状態で /admin へ誘導されたとき */
+const showUserNotAdminHint = ref(false);
+
 useHead({
   title: computed(() =>
     isRedirectToAdmin.value ? "管理画面 — ログイン" : "ログイン",
@@ -40,9 +45,17 @@ onMounted(async () => {
     return;
   }
   await waitUntilReady();
-  if (user.value) {
-    await navigateTo(redirectPath.value);
+  if (!user.value) return;
+  if (isRedirectToAdmin.value) {
+    const result = await checkAdminUid(user.value.uid);
+    if (result === "admin") {
+      await navigateTo(redirectPath.value);
+    } else {
+      showUserNotAdminHint.value = true;
+    }
+    return;
   }
+  await navigateTo(redirectPath.value);
 });
 
 function firebaseErrorMessage(code: string): string {
@@ -103,6 +116,16 @@ async function onSubmit() {
         }}
       </p>
     </header>
+
+    <div
+      v-if="showUserNotAdminHint && isRedirectToAdmin"
+      class="auth-panel auth-panel--admin auth-panel--warn"
+      role="status"
+    >
+      <p class="auth-panel__text">
+        現在サインインしているアカウントは管理権限がありません。管理者のメールアドレスとパスワードでログインしてください。
+      </p>
+    </div>
 
     <div v-if="isRedirectToAdmin" class="auth-panel auth-panel--admin">
       <p class="auth-panel__text">

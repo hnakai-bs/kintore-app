@@ -266,3 +266,25 @@ export function useBodyLog() {
     replaceEntries,
   };
 }
+
+/**
+ * 管理画面: 指定ユーザーの `users/{uid}/bodyLogs` を取得（Firestore 管理者 read）。
+ */
+export async function fetchBodyLogsForUserId(
+  targetUid: string,
+): Promise<BodyLogEntry[]> {
+  const nuxtApp = useNuxtApp();
+  const { waitUntilReady } = useFirebaseAuth();
+  await waitUntilReady();
+  const uid = targetUid.trim();
+  const db = nuxtApp.$firestoreDb;
+  if (!db || !uid) return [];
+  const col = collection(db, "users", uid, "bodyLogs");
+  const q = query(col, orderBy("date", "desc"));
+  const snap = await getDocs(q);
+  return sortEntries(
+    snap.docs.map((d) =>
+      docToEntry(d.id, d.data() as Record<string, unknown>),
+    ),
+  );
+}
