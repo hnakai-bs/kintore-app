@@ -25,9 +25,10 @@ export function useDailyFirestore() {
   async function fetchRange(
     startYmd: string,
     endYmd: string,
+    options?: { forUserId?: string },
   ): Promise<Record<string, Record<string, unknown>>> {
     await waitUntilReady();
-    const uid = user.value?.uid;
+    const uid = options?.forUserId ?? user.value?.uid;
     const db = nuxtApp.$firestoreDb;
     if (!uid || !db) return {};
     const col = collection(db, "users", uid, "daily");

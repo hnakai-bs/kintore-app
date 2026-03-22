@@ -11,6 +11,7 @@ useHead({ title: "管理 — ユーザー一覧" });
 
 type AdminUserRow = {
   uid: string;
+  nickname: string;
   updatedAt: Date | null;
   height: string;
   weight: string;
@@ -30,6 +31,12 @@ function formatNum(v: unknown): string {
   return Number.isFinite(n) ? String(n) : "—";
 }
 
+function formatNickname(v: unknown): string {
+  if (v == null) return "—";
+  const s = String(v).trim();
+  return s ? s : "—";
+}
+
 function updatedAtFromData(data: Record<string, unknown>): Date | null {
   const u = data.updatedAt;
   if (u && typeof u === "object" && "toDate" in u) {
@@ -42,6 +49,10 @@ function updatedAtFromData(data: Record<string, unknown>): Date | null {
 function extractFirestoreConsoleUrl(message: string): string | null {
   const m = message.match(/https:\/\/console\.firebase\.google\.com[^\s)'"]+/);
   return m ? m[0] : null;
+}
+
+function goUserDetail(uid: string) {
+  void navigateTo(`/admin/users/${uid}`);
 }
 
 onMounted(async () => {
@@ -79,6 +90,7 @@ onMounted(async () => {
         const data = prof.data() as Record<string, unknown>;
         list.push({
           uid,
+          nickname: formatNickname(data.nickname),
           updatedAt: updatedAtFromData(data),
           height: formatNum(data.height),
           weight: formatNum(data.weight),
@@ -127,8 +139,8 @@ onMounted(async () => {
   <main class="admin-page">
     <h1 class="page-title">ユーザー一覧</h1>
     <p class="admin-page__lead">
-      プロフィールを保存したユーザが <code>userDirectory</code> に登録され、ここに表示されます（初回はプロフィール画面を開くか保存すると登録されます）。メールアドレスは Firestore に無いため UID
-      で識別します。
+      プロフィールを保存したユーザが <code>userDirectory</code> に登録され、ここに表示されます（初回はプロフィール画面を開くか保存すると登録されます）。      ニックネームはプロフィールの <code>nickname</code> です。メールアドレスは Firestore に無いため UID
+      でも識別できます。行をクリックするとユーザー詳細（コンディション・トレーニングログ）を開きます。
     </p>
 
     <p v-if="errorMessage" class="admin-page__error" role="alert">
@@ -160,6 +172,7 @@ onMounted(async () => {
           <thead>
             <tr>
               <th scope="col">UID</th>
+              <th scope="col">ニックネーム</th>
               <th scope="col">更新</th>
               <th scope="col">身長</th>
               <th scope="col">体重</th>
@@ -167,8 +180,19 @@ onMounted(async () => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="r in rows" :key="r.uid">
+            <tr
+              v-for="r in rows"
+              :key="r.uid"
+              class="admin-user-table__row--click"
+              tabindex="0"
+              role="link"
+              :aria-label="`ユーザー ${r.nickname} の詳細を開く`"
+              @click="goUserDetail(r.uid)"
+              @keydown.enter.prevent="goUserDetail(r.uid)"
+              @keydown.space.prevent="goUserDetail(r.uid)"
+            >
               <td class="admin-user-table__mono">{{ r.uid }}</td>
+              <td>{{ r.nickname }}</td>
               <td>
                 <span v-if="r.updatedAt" class="admin-user-table__muted">{{
                   r.updatedAt.toLocaleString("ja-JP")

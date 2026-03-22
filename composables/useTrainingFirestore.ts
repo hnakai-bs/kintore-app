@@ -8,6 +8,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
+import { ymd } from "~/utils/conditionGraphCore";
 import {
   firestoreBlocked,
   firestoreOk,
@@ -24,9 +25,10 @@ export function useTrainingFirestore() {
   async function fetchRange(
     startYmd: string,
     endYmd: string,
+    options?: { forUserId?: string },
   ): Promise<Record<string, unknown[]>> {
     await waitUntilReady();
-    const uid = user.value?.uid;
+    const uid = options?.forUserId ?? user.value?.uid;
     const db = nuxtApp.$firestoreDb;
     if (!uid || !db) return {};
     const col = collection(db, "users", uid, "training");
@@ -42,6 +44,34 @@ export function useTrainingFirestore() {
       out[d.id] = Array.isArray(data.sets) ? data.sets : [];
     });
     return out;
+  }
+
+  /**
+   * 直近のトレーニング日（新しい順）。管理画面の一覧用。
+   * `orderBy(documentId())` は環境によってインデックス／評価で失敗することがあるため、
+   * `fetchRange` と同じ range クエリで取得し、クライアント側で ID 降順に並べる。
+   */
+  async function listTrainingDaysDesc(
+    limitCount: number,
+    options?: { forUserId?: string },
+  ): Promise<{ dateYmd: string; sets: unknown[] }[]> {
+    await waitUntilReady();
+    const uid = options?.forUserId ?? user.value?.uid;
+    const db = nuxtApp.$firestoreDb;
+    if (!uid || !db) return [];
+
+    const maxDays = Math.min(500, Math.max(1, limitCount));
+    const end = new Date();
+    end.setHours(12, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - (maxDays - 1));
+
+    const map = await fetchRange(ymd(start), ymd(end), options);
+    const keys = Object.keys(map).sort((a, b) => b.localeCompare(a));
+    return keys.map((dateYmd) => ({
+      dateYmd,
+      sets: map[dateYmd] ?? [],
+    }));
   }
 
   async function getDay(dateYmd: string): Promise<unknown[] | null> {
@@ -76,5 +106,5 @@ export function useTrainingFirestore() {
     }
   }
 
-  return { fetchRange, getDay, saveDay };
+  return { fetchRange, listTrainingDaysDesc, getDay, saveDay };
 }

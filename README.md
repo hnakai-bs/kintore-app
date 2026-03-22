@@ -64,7 +64,7 @@ npx serve .output/public
 | `users/{uid}/daily/{yyyy-mm-dd}` | コンディション（体重・PFC・睡眠・体調など） |
 | `users/{uid}/training/{yyyy-mm-dd}` | トレーニングセット |
 | `users/{uid}/settings/sessions` | トレーニングセッション定義 |
-| `users/{uid}/settings/profile` | プロフィール・目標（身長・体重・算出 PFC など） |
+| `users/{uid}/settings/profile` | プロフィール・目標（ニックネーム・身長・体重・算出 PFC など） |
 | `users/{uid}/settings/vision` | ビジョン文面 |
 | `users/{uid}/settings/preferences` | コンディションログの表示期間（1週間／1ヶ月／期間指定と日付） |
 | `users/{uid}/bodyLogs/{entryId}` | ボディログ（日付・各スロット画像の **Storage ダウンロード URL**） |
@@ -122,7 +122,7 @@ npm run admin:create -- admin@example.com
 2. **`firebase deploy --only firestore`**（ルール＋インデックス）を実行し、更新後の `firestore.rules` と `firestore.indexes.json` を反映してください。インデックスの構築が終わるまで数分かかることがあります。
 3. 管理者で通常どおり **ログイン**したうえで **`/admin`** を開くか、メニューの **管理** から入ります。`admin_users` に載っていないユーザーが `/admin` に来ると **ホームへリダイレクト**されます。
 
-**ユーザー一覧**は `userDirectory` の UID を起点に、各 `users/{uid}/settings/profile` を読み取っています（`collectionGroup("settings")` は他プロジェクトの `settings` とルール衝突しやすいため使っていません）。既存ユーザは **プロフィールを一度保存し直す**か **プロフィール画面を開く**（`userDirectory` が無ければ補完）と一覧に載ります。メールアドレスは一覧に出しません（UID で識別）。
+**ユーザー一覧**は `userDirectory` の UID を起点に、各 `users/{uid}/settings/profile` を読み取っています（`collectionGroup("settings")` は他プロジェクトの `settings` とルール衝突しやすいため使っていません）。既存ユーザは **プロフィールを一度保存し直す**か **プロフィール画面を開く**（`userDirectory` が無ければ補完）と一覧に載ります。メールアドレスは一覧に出しません（UID で識別）。一覧の **行をクリック**すると **`/admin/users/{uid}`** で、そのユーザーの **コンディション（日次 `daily` のグラフ）** と **トレーニング（`training` を月指定の表形式＋月次セット数サマリ）** を **タブ切替**で閲覧できます（コンディションは該当タブ表示中のみグラフをマウントし、トレーニングは表示月ごとに `fetchRange` で取得します。閲覧のみ・管理者の `preferences` は変更しません）。
 
 `/admin` で **500** や **`Missing or insufficient permissions`** が出る場合は、多くは **Firestore の本番ルールが古い**（`admin_users` や管理者用の `read` が未反映）です。`firebase deploy --only firestore` でリポジトリの `firestore.rules` と `firestore.indexes.json` を反映し、インデックスのビルド完了を待ってから再度試してください。ルール未反映時はミドルウェア側でホームへ戻すようにしてあり、アプリ全体の 500 は避けています。
 

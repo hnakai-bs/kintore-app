@@ -1,5 +1,6 @@
 <script setup lang="ts">
 type Profile = {
+  nickname: string;
   height: number | "";
   weight: number | "";
   bodyFat: number | "";
@@ -15,6 +16,7 @@ type Profile = {
 };
 
 const DEFAULT_PROFILE: Profile = {
+  nickname: "",
   height: "",
   weight: "",
   bodyFat: "",
@@ -59,6 +61,9 @@ function profileFromServer(data: Record<string, unknown>): Profile {
   if ("bulkOrCut" in data && data.bulkOrCut != null) {
     p.bulkOrCut = String(data.bulkOrCut);
   }
+  if ("nickname" in data && data.nickname != null) {
+    p.nickname = String(data.nickname).trim().slice(0, 40);
+  }
   return p;
 }
 
@@ -78,6 +83,7 @@ function profileToFirestore(p: Profile): Record<string, unknown> {
     goalSleep: n(p.goalSleep),
     trainingExperience: p.trainingExperience || null,
     bulkOrCut: p.bulkOrCut || null,
+    nickname: p.nickname.trim() ? p.nickname.trim().slice(0, 40) : null,
   };
 }
 
@@ -150,7 +156,6 @@ function computeGoalsFromProfile(p: Profile) {
 
 useHead({ title: "プロフィール" });
 
-const runtimeConfig = useRuntimeConfig();
 const { user } = useFirebaseAuth();
 const profileFirestore = useProfileFirestore();
 const profile = reactive<Profile>({ ...DEFAULT_PROFILE });
@@ -247,6 +252,11 @@ function onBulkCutChange(v: string) {
   void patchProfile({ bulkOrCut: v });
 }
 
+function onNicknameChange(raw: string) {
+  const nickname = raw.trim().slice(0, 40);
+  void patchGoalsManual({ nickname });
+}
+
 function inputVal(e: Event) {
   return (e.target as HTMLInputElement).value;
 }
@@ -308,26 +318,24 @@ watch(
       {{ loadError }}
     </p>
 
-    <p
-      v-if="runtimeConfig.public.firebaseProjectId && user?.uid"
-      class="profile-firestore-hint"
-    >
-      <span class="profile-firestore-hint__label">Firestore の確認用</span>
-      このアプリが書き込んでいるプロジェクト ID は
-      <strong>{{ runtimeConfig.public.firebaseProjectId }}</strong>
-      です。Console も同じプロジェクトを開いてください。保存パスは
-      <code class="profile-firestore-hint__code"
-        >users/{{ user.uid }}/settings/profile</code
-      >
-      （親の <code class="profile-firestore-hint__code">users/{{ user.uid }}</code>
-      にフィールドが無くても正常です）。左カラムでその UID を選び、サブコレクション
-      <strong>settings</strong> → ドキュメント <strong>profile</strong> を開きます。
-    </p>
-
     <form class="profile-form" autocomplete="off" @submit.prevent>
       <section class="card profile-card" aria-labelledby="profile-basic-heading">
         <h2 id="profile-basic-heading" class="profile-section-title">基本情報</h2>
         <div class="fields">
+          <div class="field">
+            <span class="field-label">
+              <span class="field-label-dot" style="background: var(--c-sleep)" />
+              ニックネーム
+            </span>
+            <input
+              type="text"
+              autocomplete="nickname"
+              maxlength="40"
+              :value="profile.nickname"
+              placeholder="表示名（任意）"
+              @change="onNicknameChange(inputVal($event))"
+            />
+          </div>
           <div class="field">
             <span class="field-label">
               <span class="field-label-dot" style="background: var(--c-condition)" />
