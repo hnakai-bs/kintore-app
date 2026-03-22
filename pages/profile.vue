@@ -156,20 +156,8 @@ function computeGoalsFromProfile(p: Profile) {
 
 useHead({ title: "プロフィール" });
 
-function formatCommentDateJa(ymd: string): string {
-  const [y, m, d] = ymd.split("-").map(Number);
-  if (!y || !m || !d) return ymd;
-  return new Intl.DateTimeFormat("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  }).format(new Date(y, m - 1, d, 12, 0, 0, 0));
-}
-
 const { user } = useFirebaseAuth();
 const profileFirestore = useProfileFirestore();
-const inbox = useTrainerCommentsInbox();
 const profile = reactive<Profile>({ ...DEFAULT_PROFILE });
 const saveError = ref<string | null>(null);
 const loadError = ref<string | null>(null);
@@ -305,11 +293,6 @@ async function hydrateProfileFromCloud() {
 
 onMounted(() => {
   void hydrateProfileFromCloud();
-  void inbox.refreshInbox();
-});
-
-onBeforeUnmount(() => {
-  void inbox.markAllInListAsSeen();
 });
 
 watch(
@@ -319,7 +302,6 @@ watch(
     if (prevUid === undefined) return;
     if (uid === prevUid) return;
     void hydrateProfileFromCloud();
-    void inbox.refreshInbox();
   },
 );
 </script>
@@ -335,64 +317,6 @@ watch(
     >
       {{ loadError }}
     </p>
-
-    <section
-      v-if="user?.uid"
-      class="card profile-trainer-comments"
-      aria-labelledby="profile-trainer-comments-h"
-    >
-      <h2 id="profile-trainer-comments-h" class="profile-section-title">
-        トレーナーからのコメント
-      </h2>
-      <p class="profile-section-note">
-        ヘッダーのベルからも同じ一覧を開けます。ページを離れると表示中のコメントは閲覧済みになります。
-      </p>
-      <p
-        v-if="inbox.error"
-        class="profile-alert profile-alert--error"
-        role="alert"
-      >
-        {{ inbox.error }}
-      </p>
-      <p
-        v-else-if="inbox.loading"
-        class="profile-trainer-comments__loading"
-      >
-        読み込み中…
-      </p>
-      <p
-        v-else-if="inbox.comments.length === 0"
-        class="profile-trainer-comments__empty"
-      >
-        まだコメントはありません。
-      </p>
-      <ul v-else class="profile-trainer-comments__list">
-        <li
-          v-for="c in inbox.comments"
-          :key="c.id"
-          class="profile-trainer-comments__item"
-          :class="{
-            'profile-trainer-comments__item--unread': !inbox.isCommentRead(c.id),
-          }"
-        >
-          <div class="profile-trainer-comments__meta">
-            <span class="profile-trainer-comments__date">{{
-              formatCommentDateJa(c.date)
-            }}</span>
-            <span
-              class="profile-trainer-comments__read-badge"
-              :class="{
-                'profile-trainer-comments__read-badge--unread':
-                  !inbox.isCommentRead(c.id),
-              }"
-            >{{
-              inbox.isCommentRead(c.id) ? "閲覧済み" : "未読"
-            }}</span>
-          </div>
-          <p class="profile-trainer-comments__text">{{ c.text }}</p>
-        </li>
-      </ul>
-    </section>
 
     <form class="profile-form" autocomplete="off" @submit.prevent>
       <section class="card profile-card" aria-labelledby="profile-basic-heading">

@@ -86,6 +86,25 @@ body {
   color: var(--text);
 }
 
+/* コンディションログ（ユーザー /graph）: 期間セグメント下の余白・チャート間の均等な縦間隔 */
+.main > .condition-log-panel > .period-seg {
+  margin-bottom: 14px;
+}
+
+.main > .condition-log-panel > .custom-range {
+  margin-bottom: 14px;
+}
+
+.main > .condition-log-panel > .condition-log-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.main > .condition-log-panel .chart-card {
+  padding: 12px 8px;
+}
+
 .custom-range {
   display: flex;
   flex-direction: column;

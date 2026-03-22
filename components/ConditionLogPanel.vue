@@ -351,7 +351,12 @@ watch(
       </button>
     </div>
 
-    <div :class="chartsGrid ? 'admin-condition-chart-grid' : undefined">
+    <div
+      :class="[
+        'condition-log-charts',
+        chartsGrid ? 'admin-condition-chart-grid' : undefined,
+      ]"
+    >
       <section
         v-for="spec in chartSpecs"
         :key="spec.id"

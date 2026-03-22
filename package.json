@@ -14,7 +14,8 @@
     "deploy": "npm run build && firebase deploy",
     "deploy:hosting": "npm run build && firebase deploy --only hosting",
     "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
-    "admin:create": "node ./scripts/create-admin.mjs"
+    "admin:create": "node ./scripts/create-admin.mjs",
+    "clear-training-data": "node ./scripts/clear-training-exercises.mjs"
   },
   "dependencies": {
     "firebase": "^11.6.0",
