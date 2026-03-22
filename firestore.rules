@@ -1,8 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    /** Console 等で手動作成のみ（クライアントからの作成・更新は不可）。Storage の isAdmin() と同じパス */
+    match /admin_users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    function isFirestoreAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admin_users/$(request.auth.uid));
+    }
+
+    /**
+     * 管理画面のユーザー一覧用（collectionGroup("settings") は DB 内の別パスの settings と衝突しやすい）。
+     * 本人のみ書き込み、管理者は全件読み取り可。
+     */
+    match /userDirectory/{uid} {
+      allow read: if request.auth != null
+        && (request.auth.uid == uid || isFirestoreAdmin());
+      allow create, update: if request.auth != null && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isFirestoreAdmin();
     }
   }
 }

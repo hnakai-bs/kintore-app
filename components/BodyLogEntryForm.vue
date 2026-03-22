@@ -5,10 +5,13 @@ const props = defineProps<{
   entryId?: string;
 }>();
 
-const { entries, addEntry, updateEntry, loadFromStorage } = useBodyLog();
+const { entries, addEntry, updateEntry, deleteEntry, loadFromStorage } =
+  useBodyLog();
 
 const saveError = ref("");
+const deleteError = ref("");
 const saving = ref(false);
+const deleting = ref(false);
 
 const isEdit = computed(() => Boolean(props.entryId));
 
@@ -123,6 +126,42 @@ async function onSubmit(e: Event) {
       "保存に失敗しました。ネットワークと Firebase の設定を確認してください。";
   } finally {
     saving.value = false;
+  }
+}
+
+function formatDateLabelConfirm(ymd: string) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  if (!y || !m || !d) return ymd;
+  const dt = new Date(y, m - 1, d);
+  dt.setHours(12, 0, 0, 0);
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    weekday: "short",
+  }).format(dt);
+}
+
+async function confirmAndDeleteEntry() {
+  if (!props.entryId) return;
+  const label = formatDateLabelConfirm(dateStr.value);
+  if (
+    !confirm(
+      `「${label}」の記録を本当に削除しますか？\n削除すると元に戻せません。`,
+    )
+  ) {
+    return;
+  }
+  deleteError.value = "";
+  deleting.value = true;
+  try {
+    await deleteEntry(props.entryId);
+    await navigateTo("/body-log");
+  } catch {
+    deleteError.value =
+      "削除に失敗しました。しばらくしてから再度お試しください。";
+  } finally {
+    deleting.value = false;
   }
 }
 </script>
@@ -340,7 +379,7 @@ async function onSubmit(e: Event) {
     <button
       type="submit"
       class="sessions-btn-primary body-log-form-submit"
-      :disabled="saving"
+      :disabled="saving || deleting"
     >
       {{
         saving
@@ -351,4 +390,25 @@ async function onSubmit(e: Event) {
       }}
     </button>
   </form>
+
+  <div v-if="isEdit" class="body-log-edit-delete">
+    <p class="body-log-edit-delete__note">
+      この記録を削除すると、写真とデータは元に戻せません。
+    </p>
+    <p
+      v-if="deleteError"
+      class="body-log-save-error body-log-edit-delete__error"
+      role="alert"
+    >
+      {{ deleteError }}
+    </p>
+    <button
+      type="button"
+      class="body-log-edit-delete__btn"
+      :disabled="saving || deleting"
+      @click="confirmAndDeleteEntry"
+    >
+      {{ deleting ? "削除中…" : "この記録を削除" }}
+    </button>
+  </div>
 </template>

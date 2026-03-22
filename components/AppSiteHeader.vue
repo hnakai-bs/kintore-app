@@ -2,11 +2,12 @@
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig();
 const { user, isConfigured, signOut } = useFirebaseAuth();
+const { isAdmin, refresh: refreshAdmin } = useAdminAccess();
 
 const menuOpen = ref(false);
 const menuBtn = ref<HTMLButtonElement | null>(null);
 
-const nav = [
+const baseNav = [
   { to: "/", label: "コンディションレコード", match: (p: string) => p === "/" },
   { to: "/graph", label: "コンディションログ", match: (p: string) => p === "/graph" },
   {
@@ -32,6 +33,26 @@ const nav = [
   { to: "/vision", label: "ビジョン", match: (p: string) => p === "/vision" },
   { to: "/profile", label: "プロフィール", match: (p: string) => p === "/profile" },
 ];
+
+const nav = computed(() => {
+  const items = [...baseNav];
+  if (isAdmin.value) {
+    items.push({
+      to: "/admin",
+      label: "管理",
+      match: (p: string) => p.startsWith("/admin"),
+    });
+  }
+  return items;
+});
+
+onMounted(() => {
+  void refreshAdmin();
+});
+
+watch(user, () => {
+  void refreshAdmin();
+});
 
 function isCurrent(item: (typeof nav)[0]) {
   return item.match(route.path);

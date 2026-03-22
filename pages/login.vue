@@ -3,18 +3,14 @@ definePageMeta({
   layout: "auth",
 });
 
-useHead({ title: "ログイン" });
-
 const route = useRoute();
 const {
   isConfigured,
   waitUntilReady,
   signInWithEmail,
-  signUpWithEmail,
   user,
 } = useFirebaseAuth();
 
-const mode = ref<"login" | "register">("login");
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
@@ -27,6 +23,15 @@ function safeInternalPath(path: unknown, fallback = "/") {
   return path;
 }
 
+const redirectPath = computed(() => safeInternalPath(route.query.redirect, "/"));
+const isRedirectToAdmin = computed(() => redirectPath.value.startsWith("/admin"));
+
+useHead({
+  title: computed(() =>
+    isRedirectToAdmin.value ? "管理画面 — ログイン" : "ログイン",
+  ),
+});
+
 onMounted(async () => {
   const config = useRuntimeConfig().public;
   if (!config.firebaseApiKey) {
@@ -36,7 +41,7 @@ onMounted(async () => {
   }
   await waitUntilReady();
   if (user.value) {
-    await navigateTo(safeInternalPath(route.query.redirect, "/"));
+    await navigateTo(redirectPath.value);
   }
 });
 
@@ -48,10 +53,8 @@ function firebaseErrorMessage(code: string): string {
     "auth/wrong-password": "メールまたはパスワードが正しくありません。",
     "auth/invalid-credential":
       "メールまたはパスワードが正しくありません。",
-    "auth/email-already-in-use": "このメールアドレスは既に登録されています。",
-    "auth/weak-password":
-      "パスワードが弱すぎます。6文字以上にしてください。",
-    "auth/too-many-requests": "試行回数が多すぎます。しばらく待ってから再度お試しください。",
+    "auth/too-many-requests":
+      "試行回数が多すぎます。しばらく待ってから再度お試しください。",
     "auth/network-request-failed": "ネットワークエラーです。接続を確認してください。",
   };
   return map[code] ?? "エラーが発生しました。もう一度お試しください。";
@@ -62,12 +65,8 @@ async function onSubmit() {
   if (!isConfigured.value) return;
   pending.value = true;
   try {
-    if (mode.value === "login") {
-      await signInWithEmail(email.value.trim(), password.value);
-    } else {
-      await signUpWithEmail(email.value.trim(), password.value);
-    }
-    await navigateTo(safeInternalPath(route.query.redirect, "/"));
+    await signInWithEmail(email.value.trim(), password.value);
+    await navigateTo(redirectPath.value);
   } catch (e: unknown) {
     const code =
       e && typeof e === "object" && "code" in e
@@ -81,39 +80,47 @@ async function onSubmit() {
 </script>
 
 <template>
-  <main class="main auth-page">
-    <h1 class="page-title">
-      {{ mode === "login" ? "ログイン" : "新規登録" }}
-    </h1>
+  <main
+    class="main auth-page"
+    :class="isRedirectToAdmin ? 'auth-page--admin' : 'auth-page--user'"
+  >
+    <header class="auth-page__header">
+      <p
+        v-if="isRedirectToAdmin"
+        class="auth-page__badge"
+        aria-label="管理画面"
+      >
+        管理
+      </p>
+      <h1 class="auth-page__title page-title">
+        {{ isRedirectToAdmin ? "管理画面にログイン" : "ログイン" }}
+      </h1>
+      <p class="auth-page__subtitle">
+        {{
+          isRedirectToAdmin
+            ? "管理者アカウントでサインインしてください。"
+            : "登録済みのメールアドレスとパスワードを入力してください。"
+        }}
+      </p>
+    </header>
 
-    <div class="auth-card card">
-      <div class="auth-mode-seg" role="group" aria-label="モード">
-        <button
-          type="button"
-          class="auth-mode-btn"
-          :class="{ 'is-active': mode === 'login' }"
-          :aria-pressed="mode === 'login' ? 'true' : 'false'"
-          @click="mode = 'login'"
-        >
-          ログイン
-        </button>
-        <button
-          type="button"
-          class="auth-mode-btn"
-          :class="{ 'is-active': mode === 'register' }"
-          :aria-pressed="mode === 'register' ? 'true' : 'false'"
-          @click="mode = 'register'"
-        >
-          新規登録
-        </button>
-      </div>
+    <div v-if="isRedirectToAdmin" class="auth-panel auth-panel--admin">
+      <p class="auth-panel__text">
+        入場後も <strong>/admin</strong> に入れない場合は、Firestore の
+        <strong>admin_users</strong> に、ドキュメント ID を
+        <strong>あなたの UID</strong> としたドキュメントがあるか確認してください。
+      </p>
+    </div>
 
+    <div class="auth-card card" :class="{ 'auth-card--admin': isRedirectToAdmin }">
       <form class="auth-form" @submit.prevent="onSubmit">
         <div class="field">
           <label class="field-label" for="auth-email">
             <span
               class="field-label-dot"
-              style="background: var(--accent)"
+              :style="{
+                background: isRedirectToAdmin ? '#dc2626' : 'var(--accent)',
+              }"
             />
             メールアドレス
           </label>
@@ -139,7 +146,7 @@ async function onSubmit() {
             id="auth-password"
             v-model="password"
             type="password"
-            :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
+            autocomplete="current-password"
             required
             minlength="6"
             placeholder="6文字以上"
@@ -153,9 +160,10 @@ async function onSubmit() {
         <button
           type="submit"
           class="auth-submit"
+          :class="{ 'auth-submit--admin': isRedirectToAdmin }"
           :disabled="pending || !isConfigured"
         >
-          {{ pending ? "処理中…" : mode === "login" ? "ログイン" : "登録する" }}
+          {{ pending ? "処理中…" : "ログイン" }}
         </button>
       </form>
     </div>

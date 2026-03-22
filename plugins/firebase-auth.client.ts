@@ -3,7 +3,6 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -64,11 +63,6 @@ export default defineNuxtPlugin(() => {
         whenReady,
         signInWithEmail(email: string, password: string) {
           return signInWithEmailAndPassword(auth, email, password).then(() => {});
-        },
-        signUpWithEmail(email: string, password: string) {
-          return createUserWithEmailAndPassword(auth, email, password).then(
-            () => {},
-          );
         },
         signOutUser() {
           return signOut(auth);

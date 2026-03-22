@@ -1,5 +1,17 @@
+<script setup lang="ts">
+const route = useRoute();
+
+const redirectQuery = computed(() => {
+  const r = route.query.redirect;
+  if (Array.isArray(r)) return typeof r[0] === "string" ? r[0] : "";
+  return typeof r === "string" ? r : "";
+});
+
+const isAdminLogin = computed(() => redirectQuery.value.startsWith("/admin"));
+</script>
+
 <template>
-  <div class="auth-layout">
+  <div class="auth-layout" :class="{ 'auth-layout--admin': isAdminLogin }">
     <header class="auth-layout__header">
       <NuxtLink
         to="/"
@@ -33,5 +45,17 @@
   padding: 12px 16px;
   border-bottom: 1px solid var(--border, #e5e5e5);
   background: #fff;
+}
+
+/* 管理者ログイン: 背景はユーザー同様の白系、ロゴのみ赤で区別 */
+.auth-layout--admin :deep(.site-logo) {
+  color: #b91c1c;
+}
+.auth-layout--admin :deep(.site-logo__mark) {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+.auth-layout--admin :deep(.site-logo__text) {
+  color: #b91c1c;
 }
 </style>

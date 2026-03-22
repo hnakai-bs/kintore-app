@@ -150,6 +150,7 @@ function computeGoalsFromProfile(p: Profile) {
 
 useHead({ title: "プロフィール" });
 
+const runtimeConfig = useRuntimeConfig();
 const { user } = useFirebaseAuth();
 const profileFirestore = useProfileFirestore();
 const profile = reactive<Profile>({ ...DEFAULT_PROFILE });
@@ -305,6 +306,22 @@ watch(
       role="alert"
     >
       {{ loadError }}
+    </p>
+
+    <p
+      v-if="runtimeConfig.public.firebaseProjectId && user?.uid"
+      class="profile-firestore-hint"
+    >
+      <span class="profile-firestore-hint__label">Firestore の確認用</span>
+      このアプリが書き込んでいるプロジェクト ID は
+      <strong>{{ runtimeConfig.public.firebaseProjectId }}</strong>
+      です。Console も同じプロジェクトを開いてください。保存パスは
+      <code class="profile-firestore-hint__code"
+        >users/{{ user.uid }}/settings/profile</code
+      >
+      （親の <code class="profile-firestore-hint__code">users/{{ user.uid }}</code>
+      にフィールドが無くても正常です）。左カラムでその UID を選び、サブコレクション
+      <strong>settings</strong> → ドキュメント <strong>profile</strong> を開きます。
     </p>
 
     <form class="profile-form" autocomplete="off" @submit.prevent>

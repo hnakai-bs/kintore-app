@@ -20,10 +20,15 @@ export default defineNuxtConfig({
           content: "width=device-width, initial-scale=1, viewport-fit=cover",
         },
         { name: "theme-color", content: "#ffffff" },
+        { name: "robots", content: "noindex" },
       ],
     },
   },
-  css: ["~/assets/css/styles.css", "~/assets/css/site-header.css"],
+  css: [
+    "~/assets/css/styles.css",
+    "~/assets/css/site-header.css",
+    "~/assets/css/admin.css",
+  ],
   /** ブラウザが Vite の内部ポート（例: 24678）へ直接フェッチして ERR_CONNECTION_REFUSED になるのを防ぐ */
   vite: {
     server: {

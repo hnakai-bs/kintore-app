@@ -1,35 +1,106 @@
-.auth-page {
+/* ユーザー向けログイン（/login） */
+.auth-page--user {
   max-width: 420px;
   margin-inline: auto;
-  padding: 24px 16px 48px;
+  padding: 28px 16px 56px;
+}
+
+.auth-page--user .auth-page__title {
+  color: var(--text, #1a1a1a);
+}
+
+.auth-page--user .auth-page__subtitle {
+  color: var(--text-muted, #737373);
+}
+
+/* 管理向けログイン（/login?redirect=/admin）— 白背景＋赤アクセントでユーザーと区別 */
+.auth-page--admin {
+  max-width: 440px;
+  margin-inline: auto;
+  padding: 28px 16px 56px;
+}
+
+.auth-page--admin .auth-page__title {
+  color: var(--text, #1a1a1a);
+}
+
+.auth-page--admin .auth-page__subtitle {
+  color: #991b1b;
+  font-weight: 500;
+}
+
+.auth-page__header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-page__badge {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 4px 12px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #eef2ff;
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  border-radius: 999px;
+}
+
+.auth-page--admin .auth-page__badge {
+  color: #fff;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  border: none;
+}
+
+.auth-page__title {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.auth-page__subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.auth-panel {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.auth-panel--admin {
+  border: 1px solid #fecaca;
+  background: linear-gradient(180deg, #fef2f2 0%, #fff 100%);
+  color: #7f1d1d;
+}
+
+.auth-panel--admin strong {
+  color: #991b1b;
+}
+
+.auth-panel__text {
+  margin: 0;
 }
 
 .auth-card {
-  padding: 20px 18px 24px;
+  padding: 22px 20px 26px;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.auth-mode-seg {
-  display: flex;
-  gap: 0;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border, #e5e5e5);
+.auth-page--user .auth-card {
+  border-top: 4px solid var(--accent, #2563eb);
 }
 
-.auth-mode-btn {
-  flex: 1;
-  padding: 10px 12px;
-  font-size: 0.9rem;
-  border: none;
-  background: #fafafa;
-  color: #525252;
-  cursor: pointer;
-}
-
-.auth-mode-btn.is-active {
-  background: var(--accent, #2563eb);
-  color: #fff;
+.auth-card--admin {
+  border-top: 4px solid #dc2626;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.08);
 }
 
 .auth-form .field {
@@ -49,11 +120,24 @@
 .auth-form input[type="email"],
 .auth-form input[type="password"] {
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 12px;
   font-size: 1rem;
   border: 1px solid var(--border, #e5e5e5);
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-form input[type="email"]:focus,
+.auth-form input[type="password"]:focus {
+  outline: none;
+  border-color: #a3a3a3;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.auth-card--admin .auth-form input:focus {
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .auth-error {
@@ -65,14 +149,28 @@
 .auth-submit {
   width: 100%;
   margin-top: 8px;
-  padding: 12px 16px;
+  padding: 13px 16px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
   background: var(--accent, #2563eb);
   border: none;
-  border-radius: 10px;
+  border-radius: 11px;
   cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: scale(0.99);
+  filter: brightness(0.95);
+}
+
+.auth-submit--admin {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.auth-submit--admin:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
 
 .auth-submit:disabled {

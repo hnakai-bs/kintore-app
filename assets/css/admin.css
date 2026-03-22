@@ -1,0 +1,244 @@
+/* 管理画面: styles.css の body 背景を上書き（全体を白に） */
+html.admin-ui,
+html.admin-ui body {
+  background-color: #ffffff !important;
+}
+
+html.admin-ui body {
+  padding-bottom: var(--safe-bottom, 0px);
+}
+
+/* 管理レイアウト: PC 想定・白背景 */
+.admin-layout {
+  min-height: 100dvh;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.admin-layout__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 16px 28px;
+  border-bottom: 1px solid #262626;
+  background: #0a0a0a;
+}
+
+.admin-layout__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fafafa;
+}
+
+.admin-layout__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-layout__email {
+  font-size: 0.8125rem;
+  color: #a3a3a3;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-layout__logout {
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #e5e5e5;
+  background: transparent;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-layout__logout:hover {
+  background: #171717;
+  border-color: #525252;
+}
+
+.admin-layout__logout:active {
+  background: #262626;
+}
+
+.admin-layout__main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+}
+
+.admin-page__lead {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.admin-page__error {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #f0b4ae;
+}
+
+.admin-page__error-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 700;
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.admin-user-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.admin-user-table th,
+.admin-user-table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-user-table th {
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg);
+  white-space: nowrap;
+}
+
+.admin-user-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-user-table__mono {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.admin-user-table__muted {
+  color: var(--text-muted);
+}
+
+.admin-page__empty {
+  margin: 0;
+  padding: 24px 16px;
+  text-align: left;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-page__empty-code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.admin-page__loading {
+  margin: 24px 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* 管理画面に入れずホームへ戻したときの案内 */
+.admin-gate-banner {
+  max-width: 960px;
+  margin: 0 auto 16px;
+  padding: 0 16px;
+}
+
+.admin-gate-banner__inner {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #1e1b4b;
+}
+
+.admin-gate-banner__text {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.admin-gate-banner__text:last-of-type {
+  margin-bottom: 0;
+}
+
+.admin-gate-banner__uid {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid #c7d2fe;
+}
+
+.admin-gate-banner__uid-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4338ca;
+  margin-bottom: 6px;
+}
+
+.admin-gate-banner__uid-value {
+  display: block;
+  padding: 8px 10px;
+  font-size: 0.75rem;
+  word-break: break-all;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #c7d2fe;
+  color: #312e81;
+}
+
+.admin-gate-banner__close {
+  margin-top: 14px;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #6366f1;
+  background: #fff;
+  color: #4338ca;
+  cursor: pointer;
+}
+
+.admin-gate-banner__close:active {
+  background: #e0e7ff;
+}

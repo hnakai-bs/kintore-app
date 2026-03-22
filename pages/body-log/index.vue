@@ -6,9 +6,7 @@ useHead({ title: "ボディログ" });
 const PAGE_SIZE = 20;
 const LOAD_DELAY_MS = 320;
 
-const { entries, loadFromStorage, deleteEntry } = useBodyLog();
-
-const deleteError = ref("");
+const { entries, loadFromStorage } = useBodyLog();
 
 /** 入力中（検索まで反映しない） */
 const draftStart = ref("");
@@ -141,23 +139,6 @@ async function resetPeriod() {
   await runPrepare(false);
 }
 
-async function confirmAndDeleteEntry(e: BodyLogEntry) {
-  const label = formatDateLabel(e.date);
-  if (
-    !confirm(
-      `「${label}」の記録を本当に削除しますか？\n削除すると元に戻せません。`,
-    )
-  ) {
-    return;
-  }
-  deleteError.value = "";
-  try {
-    await deleteEntry(e.id);
-  } catch {
-    deleteError.value = "削除に失敗しました。しばらくしてから再度お試しください。";
-  }
-}
-
 onMounted(async () => {
   await loadFromStorage();
   window.addEventListener("keydown", onLightboxKey);
@@ -263,13 +244,6 @@ watch(entries, async () => {
       </div>
 
       <div v-else class="body-log-list-block">
-        <p
-          v-if="deleteError"
-          class="body-log-delete-error"
-          role="alert"
-        >
-          {{ deleteError }}
-        </p>
         <div
           v-if="listLoading"
           class="body-log-list-loading"
@@ -294,22 +268,12 @@ watch(entries, async () => {
               <div class="body-log-row__date">
                 {{ formatDateLabel(e.date) }}
               </div>
-              <div class="body-log-row__actions">
-                <NuxtLink
-                  :to="`/body-log/edit/${e.id}`"
-                  class="body-log-row__edit"
-                >
-                  編集
-                </NuxtLink>
-                <button
-                  type="button"
-                  class="body-log-row__delete"
-                  :aria-label="`${formatDateLabel(e.date)}の記録を削除`"
-                  @click="confirmAndDeleteEntry(e)"
-                >
-                  削除
-                </button>
-              </div>
+              <NuxtLink
+                :to="`/body-log/edit/${e.id}`"
+                class="body-log-row__edit"
+              >
+                編集
+              </NuxtLink>
             </div>
             <div class="body-log-row__photos">
               <template v-for="s in slots" :key="s.key">

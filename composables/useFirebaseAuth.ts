@@ -22,8 +22,6 @@ export function useFirebaseAuth() {
     waitUntilReady,
     signInWithEmail: (email: string, password: string) =>
       fb?.signInWithEmail(email, password),
-    signUpWithEmail: (email: string, password: string) =>
-      fb?.signUpWithEmail(email, password),
     signOut: () => fb?.signOutUser(),
   };
 }
