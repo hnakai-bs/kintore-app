@@ -2,28 +2,83 @@
 const KINTORE_EXERCISE_ENTRIES = [
   {
     name: "ベンチプレス",
-    guideUrl:
-      "https://ja.wikipedia.org/wiki/%E3%83%99%E3%83%B3%E3%83%81%E3%83%97%E3%83%AC%E3%82%B9",
+    guideUrl: "https://www.training-manual-bl.com/bench-press/",
   },
   {
     name: "インクラインダンベルプレス",
-    guideUrl:
-      "https://www.youtube.com/results?search_query=%E3%82%A4%E3%83%B3%E3%82%AF%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%80%E3%83%B3%E3%83%99%E3%83%AB%E3%83%97%E3%83%AC%E3%82%B9%20%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0",
+    guideUrl: "https://www.training-manual-bl.com/incline-dumbbell-press/",
   },
   {
     name: "マシンチェストプレス",
-    guideUrl:
-      "https://www.youtube.com/results?search_query=%E3%83%9E%E3%82%B7%E3%83%B3%E3%83%81%E3%82%A7%E3%82%B9%E3%83%88%E3%83%97%E3%83%AC%E3%82%B9%20%E3%82%84%E3%82%8A%E6%96%B9",
+    guideUrl: "https://www.training-manual-bl.com/machine-chest-press/",
   },
   {
     name: "ケーブルクロスオーバー",
-    guideUrl:
-      "https://www.youtube.com/results?search_query=%E3%82%B1%E3%83%BC%E3%83%96%E3%83%AB%E3%82%AF%E3%83%AD%E3%82%B9%E3%82%AA%E3%83%BC%E3%83%90%E3%83%BC%20%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0",
+    guideUrl: "https://www.training-manual-bl.com/cable-crossover/",
   },
   {
     name: "ミリタリープレス",
-    guideUrl:
-      "https://www.youtube.com/results?search_query=%E3%83%9F%E3%83%AA%E3%82%BF%E3%83%AA%E3%83%BC%E3%83%97%E3%83%AC%E3%82%B9%20%E3%82%84%E3%82%8A%E6%96%B9",
+    guideUrl: "https://www.training-manual-bl.com/military-press/",
+  },
+  {
+    name: "アップライトロウ",
+    guideUrl: "https://www.training-manual-bl.com/upright-row/",
+  },
+  {
+    name: "サイドレイズ",
+    guideUrl: "https://www.training-manual-bl.com/side-raise-dumbbell/",
+  },
+  {
+    name: "リアレイズ",
+    guideUrl: "https://www.training-manual-bl.com/rear-raise-machine/",
+  },
+  {
+    name: "デッドリフト",
+    guideUrl: "https://www.training-manual-bl.com/deadlift/",
+  },
+  {
+    name: "ラットプルダウン",
+    guideUrl: "https://www.training-manual-bl.com/lat-pulldown/",
+  },
+  {
+    name: "シーテッドローイング",
+    guideUrl: "https://www.training-manual-bl.com/seated-rowing/",
+  },
+  {
+    name: "ストレートアームプルダウン",
+    guideUrl: "https://www.training-manual-bl.com/straight-arm-pulldown/",
+  },
+  {
+    name: "クローズグリップベンチ",
+    guideUrl: "https://www.training-manual-bl.com/close-grip-bench-press/",
+  },
+  {
+    name: "トライセップスプッシュダウン",
+    guideUrl: "https://www.training-manual-bl.com/triceps-pushdown/",
+  },
+  {
+    name: "バーベルスクワット",
+    guideUrl: "https://www.training-manual-bl.com/barbell-squat/",
+  },
+  {
+    name: "ブルガリアンスクワット",
+    guideUrl: "https://www.training-manual-bl.com/bulgarian-squat/",
+  },
+  {
+    name: "ルーマニアンデッドリフト（ダンベル）",
+    guideUrl: "https://www.training-manual-bl.com/dumbbell-romanian-deadlift/",
+  },
+  {
+    name: "レッグエクステンション",
+    guideUrl: "https://www.training-manual-bl.com/leg-extension/",
+  },
+  {
+    name: "インクラインダンベルカール",
+    guideUrl: "https://www.training-manual-bl.com/incline-dumbbell-curl/",
+  },
+  {
+    name: "ハンマーカール",
+    guideUrl: "https://www.training-manual-bl.com/hammer-curl/",
   },
 ] as const;
 
