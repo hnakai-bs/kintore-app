@@ -15,6 +15,23 @@ type Profile = {
   goalSleep: number | "";
 };
 
+/** コンディションレコードと同じ `/public/icons` を使用（ニックネーム等は汎用） */
+const PROFILE_ICONS = {
+  nickname: "/icons/condition.png",
+  height: "/icons/height.png",
+  weight: "/icons/weight.png",
+  bodyFat: "/icons/lipid.png",
+  trainingExperience: "/icons/protein.png",
+  bulkOrCut: "/icons/calorie.png",
+  goalWeight: "/icons/weight.png",
+  goalSleep: "/icons/sleep.png",
+  goalCalories: "/icons/calorie.png",
+  goalProtein: "/icons/protein.png",
+  goalFat: "/icons/lipid.png",
+  goalCarbs: "/icons/carbohydrates.png",
+  goalFiber: "/icons/dietary_fiber.png",
+} as const;
+
 const DEFAULT_PROFILE: Profile = {
   nickname: "",
   height: "",
@@ -324,7 +341,7 @@ watch(
         <div class="fields">
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-sleep)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.nickname" alt="">
               ニックネーム
             </span>
             <input
@@ -338,7 +355,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-condition)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.height" alt="">
               身長<span class="unit">（cm）</span>
             </span>
             <input
@@ -353,7 +370,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-weight)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.weight" alt="">
               体重<span class="unit">（kg）</span>
             </span>
             <input
@@ -368,7 +385,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-fat)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.bodyFat" alt="">
               体脂肪率<span class="unit">（%）</span>
             </span>
             <input
@@ -383,7 +400,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--accent)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.trainingExperience" alt="">
               トレーニング経験
             </span>
             <select
@@ -400,7 +417,7 @@ watch(
           </div>
           <div class="field" data-profile="bulk-cut">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-protein)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.bulkOrCut" alt="">
               増量 or 減量
             </span>
             <div class="segmented condition-seg" role="group" aria-label="増量 or 減量">
@@ -453,7 +470,7 @@ watch(
         <div class="fields">
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-weight)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalWeight" alt="">
               目標体重<span class="unit">（kg）</span>
             </span>
             <input
@@ -468,7 +485,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-sleep)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalSleep" alt="">
               目標睡眠時間<span class="unit">（h）</span>
             </span>
             <input
@@ -484,7 +501,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-cal)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalCalories" alt="">
               目標カロリー<span class="unit">（kcal）</span>
             </span>
             <input
@@ -501,7 +518,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-protein)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalProtein" alt="">
               タンパク質<span class="unit">（g）</span>
             </span>
             <input
@@ -518,7 +535,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-fat)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalFat" alt="">
               脂質<span class="unit">（g）</span>
             </span>
             <input
@@ -535,7 +552,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-carb)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalCarbs" alt="">
               炭水化物<span class="unit">（g）</span>
             </span>
             <input
@@ -552,7 +569,7 @@ watch(
           </div>
           <div class="field">
             <span class="field-label">
-              <span class="field-label-dot" style="background: var(--c-fiber)" />
+              <img class="field-label__icon" :src="PROFILE_ICONS.goalFiber" alt="">
               食物繊維<span class="unit">（g）</span>
             </span>
             <input

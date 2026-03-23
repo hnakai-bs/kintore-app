@@ -10,6 +10,8 @@ html.admin-ui body {
 
 /* 管理レイアウト: PC 想定・白背景 */
 .admin-layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   width: 100%;
   max-width: none;
@@ -72,10 +74,91 @@ html.admin-ui body {
   background: #262626;
 }
 
+.admin-layout__shell {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-layout__sidebar {
+  flex-shrink: 0;
+  width: 240px;
+  border-right: 1px solid #e5e5e5;
+  background: #fafafa;
+  padding: 20px 0 32px;
+}
+
+.admin-layout__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.admin-layout__nav-link {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #404040;
+  text-decoration: none;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.admin-layout__nav-link:hover {
+  background: #f0f0f0;
+  color: #171717;
+}
+
+.admin-layout__nav-link--active {
+  background: #ffffff;
+  color: #0a0a0a;
+  border-color: #d4d4d4;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
 .admin-layout__main {
+  flex: 1;
+  min-width: 0;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 28px 48px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .admin-layout__shell {
+    flex-direction: column;
+  }
+
+  .admin-layout__sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 12px 0 16px;
+  }
+
+  .admin-layout__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px;
+  }
+
+  .admin-layout__nav-link {
+    flex: 1 1 auto;
+    min-width: min(100%, 160px);
+    text-align: center;
+  }
 }
 
 .admin-page__lead {
@@ -434,8 +517,13 @@ html.admin-ui body {
   cursor: pointer;
 }
 
-.admin-user-comments-toolbar__new:hover {
+.admin-user-comments-toolbar__new:hover:not(:disabled) {
   background: #1d4ed8;
+}
+
+.admin-user-comments-toolbar__new:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .admin-user-comments-form__row {

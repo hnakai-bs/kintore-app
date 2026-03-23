@@ -236,10 +236,24 @@ body {
 }
 
 .chart-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 10px 4px;
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--text-muted);
+}
+
+.chart-heading__icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.chart-heading__text {
+  min-width: 0;
 }
 
 .chart-wrap {
@@ -317,6 +331,16 @@ body {
   font-size: 1.625rem;
   line-height: 1.15;
   user-select: none;
+}
+
+.emoji-face--muted {
+  opacity: 0.35;
+  font-size: 1.2rem;
+}
+
+.emoji-face--unknown {
+  font-size: 1.125rem;
+  opacity: 0.85;
 }
 
 .emoji-face--kao {

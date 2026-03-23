@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { KintoreExerciseCatalog } from "~/utils/exerciseCatalog";
-
-const EXERCISE_OPTIONS = KintoreExerciseCatalog.names();
+const exerciseCatalog = useTrainingExerciseCatalog();
+const exerciseNamesList = computed(() => exerciseCatalog.names.value);
 
 const EXERCISE_CHIP_STYLES = [
   { bg: "#e8f0fe", color: "#1967d2" },
@@ -48,7 +47,7 @@ function monthGridYmdRange(viewMonth: Date): { startYmd: string; endYmd: string 
 
 function normalizeExercise(v: unknown) {
   const s = v != null ? String(v).trim() : "";
-  if (s === "" || EXERCISE_OPTIONS.includes(s)) return s;
+  if (s === "" || exerciseCatalog.isValidName(s)) return s;
   return "";
 }
 
@@ -81,7 +80,7 @@ function topDistinctExercises(
 }
 
 function chipStyle(name: string) {
-  const i = EXERCISE_OPTIONS.indexOf(name);
+  const i = exerciseNamesList.value.indexOf(name);
   const idx = i >= 0 ? i : 0;
   return EXERCISE_CHIP_STYLES[idx % EXERCISE_CHIP_STYLES.length];
 }
@@ -282,8 +281,10 @@ function onPageShow(e: PageTransitionEvent) {
   if (e.persisted) void loadVisibleRange();
 }
 
-function onVisibility() {
-  if (document.visibilityState === "visible") void loadVisibleRange();
+async function onVisibility() {
+  if (document.visibilityState !== "visible") return;
+  await exerciseCatalog.refresh();
+  void loadVisibleRange();
 }
 </script>
 

@@ -1,18 +1,65 @@
 <script setup lang="ts">
 import type { DisplayGoalKey } from "~/utils/displayGoalsFromProfile";
+import {
+  CONDITION_LEVEL_LABELS,
+  conditionLabelWithEmoji,
+  isConditionLevelLabel,
+} from "~/utils/conditionLevels";
 
 const { getDay, mergeDay } = useDailyFirestore();
 const { goals: displayGoals, refresh: refreshDisplayGoals } =
   useKintoreDisplayGoals();
 
 const GOAL_DEFS = [
-  { key: "weight", label: "体重", unit: "kg", color: "var(--c-weight)", step: "0.1" },
-  { key: "calories", label: "カロリー", unit: "kcal", color: "var(--c-cal)", step: "1" },
-  { key: "protein", label: "タンパク質", unit: "g", color: "var(--c-protein)", step: "1" },
-  { key: "fat", label: "脂質", unit: "g", color: "var(--c-fat)", step: "1" },
-  { key: "carbs", label: "炭水化物", unit: "g", color: "var(--c-carb)", step: "1" },
-  { key: "fiber", label: "食物繊維", unit: "g", color: "var(--c-fiber)", step: "1" },
-  { key: "sleep", label: "睡眠時間", unit: "h", color: "var(--c-sleep)", step: "0.1" },
+  {
+    key: "weight",
+    label: "体重",
+    unit: "kg",
+    step: "0.1",
+    iconSrc: "/icons/weight.png",
+  },
+  {
+    key: "calories",
+    label: "カロリー",
+    unit: "kcal",
+    step: "1",
+    iconSrc: "/icons/calorie.png",
+  },
+  {
+    key: "protein",
+    label: "タンパク質",
+    unit: "g",
+    step: "1",
+    iconSrc: "/icons/protein.png",
+  },
+  {
+    key: "fat",
+    label: "脂質",
+    unit: "g",
+    step: "1",
+    iconSrc: "/icons/lipid.png",
+  },
+  {
+    key: "carbs",
+    label: "炭水化物",
+    unit: "g",
+    step: "1",
+    iconSrc: "/icons/carbohydrates.png",
+  },
+  {
+    key: "fiber",
+    label: "食物繊維",
+    unit: "g",
+    step: "1",
+    iconSrc: "/icons/dietary_fiber.png",
+  },
+  {
+    key: "sleep",
+    label: "睡眠時間",
+    unit: "h",
+    step: "0.1",
+    iconSrc: "/icons/sleep.png",
+  },
 ] as const;
 
 const DAILY_DEFS = [
@@ -21,8 +68,8 @@ const DAILY_DEFS = [
     key: "condition",
     label: "体調",
     unit: "",
-    color: "var(--c-condition)",
     type: "condition" as const,
+    iconSrc: "/icons/condition.png",
   },
 ];
 
@@ -183,14 +230,32 @@ function onNumberChange(keyField: string, raw: string) {
   });
 }
 
-function onConditionChange(val: string) {
-  void setEntry(currentKey.value, { condition: val === "none" ? "" : val });
+function onConditionSelect(e: Event) {
+  const v = (e.target as HTMLSelectElement).value;
+  void setEntry(currentKey.value, { condition: v });
 }
 
-function onConditionRadio(e: Event) {
-  const v = (e.target as HTMLInputElement).value;
-  onConditionChange(v);
-}
+/** 旧データなど、定義外の文字列が残っている場合 */
+const legacyConditionLabel = computed(() => {
+  const v = entry.value.condition;
+  if (v === undefined || v === null || v === "") return "";
+  const s = String(v);
+  return isConditionLevelLabel(s) ? "" : s;
+});
+
+const conditionSelectToneClass = computed(() => {
+  const v = entry.value.condition;
+  if (v === undefined || v === null || v === "") return "condition-select--tone-empty";
+  const s = String(v);
+  const map: Record<string, string> = {
+    絶好調: "condition-select--tone-excellent",
+    好調: "condition-select--tone-good",
+    普通: "condition-select--tone-normal",
+    不調: "condition-select--tone-poor",
+    絶不調: "condition-select--tone-awful",
+  };
+  return map[s] ?? "condition-select--tone-empty";
+});
 
 function onVisibilityGoals() {
   if (document.visibilityState === "visible") void refreshDisplayGoals();
@@ -253,10 +318,7 @@ onUnmounted(() => {
               :data-goal="d.key"
             >
               <span class="field-label">
-                <span
-                  class="field-label-dot"
-                  :style="{ background: d.color }"
-                />
+                <img class="field-label__icon" :src="d.iconSrc" alt="">
                 {{ d.label }}<span class="unit">（{{ d.unit }}）</span>
               </span>
               <span class="goal-value">{{ goalRowValue(d.key) }}</span>
@@ -277,48 +339,40 @@ onUnmounted(() => {
               data-daily="condition"
             >
               <span class="field-label">
-                <span
-                  class="field-label-dot"
-                  :style="{ background: d.color }"
-                />
+                <img class="field-label__icon" :src="d.iconSrc" alt="">
                 {{ d.label }}
               </span>
-              <div class="segmented condition-seg" role="group" aria-label="体調">
-                <input
-                  :id="'cond-none-' + currentKey"
-                  type="radio"
-                  :name="'condition-' + currentKey"
-                  value="none"
-                  :checked="!entry.condition"
-                  @change="onConditionRadio"
-                />
-                <label :for="'cond-none-' + currentKey">—</label>
-                <input
-                  :id="'cond-normal-' + currentKey"
-                  type="radio"
-                  :name="'condition-' + currentKey"
-                  value="普通"
-                  :checked="entry.condition === '普通'"
-                  @change="onConditionRadio"
-                />
-                <label :for="'cond-normal-' + currentKey">普通</label>
-                <input
-                  :id="'cond-poor-' + currentKey"
-                  type="radio"
-                  :name="'condition-' + currentKey"
-                  value="不調"
-                  :checked="entry.condition === '不調'"
-                  @change="onConditionRadio"
-                />
-                <label :for="'cond-poor-' + currentKey">不調</label>
-              </div>
+              <select
+                :id="'condition-select-' + currentKey"
+                class="condition-select"
+                :class="conditionSelectToneClass"
+                aria-label="体調"
+                :value="
+                  entry.condition === undefined || entry.condition === null
+                    ? ''
+                    : String(entry.condition)
+                "
+                @change="onConditionSelect"
+              >
+                <option value="">—</option>
+                <option
+                  v-if="legacyConditionLabel"
+                  :value="legacyConditionLabel"
+                >
+                  {{ legacyConditionLabel }}
+                </option>
+                <option
+                  v-for="opt in CONDITION_LEVEL_LABELS"
+                  :key="opt"
+                  :value="opt"
+                >
+                  {{ conditionLabelWithEmoji(opt) }}
+                </option>
+              </select>
             </div>
             <div v-else class="field" :data-daily="d.key">
               <span class="field-label">
-                <span
-                  class="field-label-dot"
-                  :style="{ background: d.color }"
-                />
+                <img class="field-label__icon" :src="d.iconSrc" alt="">
                 {{ d.label }}<span class="unit">（{{ d.unit }}）</span>
               </span>
               <input

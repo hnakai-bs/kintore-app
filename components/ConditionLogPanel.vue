@@ -9,6 +9,8 @@ import type { DisplayGoalKey } from "~/utils/displayGoalsFromProfile";
 import {
   buildSeries,
   countPoints,
+  eachDayInclusive,
+  formatAxisLabel,
   parseYmd,
   rangeForPreset,
   resolveChartSpecs,
@@ -16,6 +18,7 @@ import {
   ymd,
   yRange,
 } from "~/utils/conditionGraphCore";
+import { conditionEmojiForLabel } from "~/utils/conditionLevels";
 
 Chart.register(...registerables);
 
@@ -53,6 +56,10 @@ const rangeEnd = ref("");
 const hintHidden = reactive<Record<string, boolean>>({});
 const chartEntries = ref<Record<string, Record<string, unknown>>>({});
 const chartInstances: Record<string, ChartType> = {};
+
+/** 体調ストリップ用（現在表示中の期間） */
+const panelRangeStart = ref<Date | null>(null);
+const panelRangeEnd = ref<Date | null>(null);
 
 const periodName = computed(
   () => `period-${props.domIdPrefix || "default"}`,
@@ -206,9 +213,62 @@ async function refresh() {
     start = r.start;
     end = r.end;
   }
+  panelRangeStart.value = start;
+  panelRangeEnd.value = end;
   await loadEntriesForRange(start, end);
   nextTick(() => renderAllCharts(start, end));
 }
+
+type ConditionMoodCell = {
+  key: string;
+  dayLabel: string;
+  emoji: string;
+  hasData: boolean;
+  isUnknown: boolean;
+  titleAttr: string;
+};
+
+const conditionMoodCells = computed((): ConditionMoodCell[] => {
+  const s = panelRangeStart.value;
+  const e = panelRangeEnd.value;
+  if (!s || !e) return [];
+  const entries = chartEntries.value;
+  const cells: ConditionMoodCell[] = [];
+  eachDayInclusive(s, e, (d) => {
+    const key = ymd(d);
+    const raw = entries[key]?.condition;
+    const str = raw != null && raw !== "" ? String(raw).trim() : "";
+    const emoji = conditionEmojiForLabel(str);
+    let display = "·";
+    let isUnknown = false;
+    if (emoji) {
+      display = emoji;
+    } else if (str) {
+      display = "?";
+      isUnknown = true;
+    }
+    const titleAttr = str
+      ? `${key} ${str}`
+      : `${key} 未記入`;
+    cells.push({
+      key,
+      dayLabel: formatAxisLabel(d),
+      emoji: display,
+      hasData: Boolean(emoji),
+      isUnknown,
+      titleAttr,
+    });
+  });
+  return cells;
+});
+
+const conditionMoodHasAny = computed(() =>
+  conditionMoodCells.value.some((c) => c.hasData),
+);
+
+const moodHeadingId = computed(
+  () => `${props.domIdPrefix || "graph"}__chart-h-condition-mood`,
+);
 
 function onPeriodChange() {
   if (mode.value === "custom") {
@@ -358,13 +418,61 @@ watch(
       ]"
     >
       <section
+        class="chart-card"
+        :aria-labelledby="moodHeadingId"
+      >
+        <h2 :id="moodHeadingId" class="chart-heading">
+          <img
+            class="chart-heading__icon"
+            src="/icons/condition.png"
+            alt=""
+            width="16"
+            height="16"
+          >
+          <span class="chart-heading__text">体調</span>
+        </h2>
+        <div class="emoji-strip" role="list">
+          <div
+            v-for="cell in conditionMoodCells"
+            :key="cell.key"
+            class="emoji-day"
+            role="listitem"
+            :title="cell.titleAttr"
+          >
+            <span class="emoji-day-date">{{ cell.dayLabel }}</span>
+            <span
+              class="emoji-face"
+              :class="{
+                'emoji-face--muted': !cell.hasData && !cell.isUnknown,
+                'emoji-face--unknown': cell.isUnknown,
+              }"
+              aria-hidden="true"
+            >{{ cell.emoji }}</span>
+          </div>
+        </div>
+        <p
+          v-if="conditionMoodCells.length > 0 && !conditionMoodHasAny"
+          class="empty-hint"
+        >
+          この期間に体調の記録がありません
+        </p>
+      </section>
+      <section
         v-for="spec in chartSpecs"
         :key="spec.id"
         class="chart-card"
         :aria-labelledby="'chart-h-' + spec.id"
       >
         <h2 :id="'chart-h-' + spec.id" class="chart-heading">
-          {{ spec.title }}
+          <img
+            v-if="spec.iconSrc"
+            class="chart-heading__icon"
+            :src="spec.iconSrc"
+            alt=""
+            width="16"
+            height="16"
+          >
+          <span class="chart-heading__text">{{ spec.title }}</span>
         </h2>
         <div
           class="chart-wrap"

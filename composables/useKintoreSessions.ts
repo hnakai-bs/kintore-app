@@ -8,6 +8,7 @@ import {
   getSessionFromState,
   listSessionsFromState,
   parseSessionsState,
+  removeSessionFromState,
   sessionsDefaultState,
   updateSessionInState,
   type SessionRow,
@@ -55,6 +56,7 @@ export function useKintoreSessions() {
         {
           byId: state.value.byId,
           customOrder: state.value.customOrder,
+          hiddenPresetIds: state.value.hiddenPresetIds ?? [],
         },
         { merge: true },
       );
@@ -124,12 +126,26 @@ export function useKintoreSessions() {
     return id;
   }
 
+  async function deleteSession(id: string): Promise<KintoreSessionWriteResult> {
+    const snapshot = cloneState();
+    if (!removeSessionFromState(state.value, id)) {
+      return { ok: false, message: "このセッションは削除できません。" };
+    }
+    const r = await persist();
+    if (!r.ok) {
+      state.value = snapshot;
+      return { ok: false, message: r.message };
+    }
+    return { ok: true };
+  }
+
   return {
     ready: readonly(ready),
     listSessions,
     getSession,
     updateSession,
     addCustomSession,
+    deleteSession,
     refresh: load,
   };
 }

@@ -7,10 +7,12 @@ export const SESSION_PRESETS = [
 export type SessionsState = {
   byId: Record<string, unknown>;
   customOrder: string[];
+  /** 一覧から消したプリセットの id（胸 & 肩 など） */
+  hiddenPresetIds: string[];
 };
 
 export function sessionsDefaultState(): SessionsState {
-  return { byId: {}, customOrder: [] };
+  return { byId: {}, customOrder: [], hiddenPresetIds: [] };
 }
 
 /** Firestore ドキュメントまたは生データから状態を復元 */
@@ -20,6 +22,7 @@ export function parseSessionsState(raw: unknown): SessionsState {
     byId?: Record<string, unknown>;
     customOrder?: string[];
     customList?: { id: string; title?: string; notes?: string }[];
+    hiddenPresetIds?: unknown;
   };
   const byId =
     p.byId && typeof p.byId === "object" ? { ...p.byId } : {};
@@ -36,7 +39,17 @@ export function parseSessionsState(raw: unknown): SessionsState {
       }
     });
   }
-  return { byId, customOrder };
+  const presetIdSet = new Set(SESSION_PRESETS.map((d) => d.id));
+  const hiddenPresetIds = Array.isArray(p.hiddenPresetIds)
+    ? [
+        ...new Set(
+          p.hiddenPresetIds
+            .map((x) => String(x))
+            .filter((id) => presetIdSet.has(id)),
+        ),
+      ]
+    : [];
+  return { byId, customOrder, hiddenPresetIds };
 }
 
 export function normalizeSessionExercises(raw: unknown): string[] {
@@ -56,23 +69,26 @@ export type SessionRow = {
 };
 
 export function listSessionsFromState(state: SessionsState): SessionRow[] {
-  const rows: SessionRow[] = SESSION_PRESETS.map((def) => {
-    const extra = (state.byId[def.id] || {}) as {
-      title?: string;
-      notes?: string;
-      exercises?: unknown;
-    };
-    const override = extra.title != null ? String(extra.title).trim() : "";
-    return {
-      id: def.id,
-      title: override || def.title,
-      preset: true,
-      notes: extra.notes ?? "",
-      exercises: Array.isArray(extra.exercises)
-        ? normalizeSessionExercises(extra.exercises)
-        : [],
-    };
-  });
+  const hidden = new Set(state.hiddenPresetIds || []);
+  const rows: SessionRow[] = SESSION_PRESETS.filter((def) => !hidden.has(def.id)).map(
+    (def) => {
+      const extra = (state.byId[def.id] || {}) as {
+        title?: string;
+        notes?: string;
+        exercises?: unknown;
+      };
+      const override = extra.title != null ? String(extra.title).trim() : "";
+      return {
+        id: def.id,
+        title: override || def.title,
+        preset: true,
+        notes: extra.notes ?? "",
+        exercises: Array.isArray(extra.exercises)
+          ? normalizeSessionExercises(extra.exercises)
+          : [],
+      };
+    },
+  );
   (state.customOrder || []).forEach((id) => {
     const row = state.byId[id] as
       | { custom?: boolean; title?: string; notes?: string; exercises?: unknown }
@@ -102,6 +118,7 @@ export function getSessionFromState(
     | { title?: string; notes?: string; exercises?: unknown; custom?: boolean }
     | undefined;
   if (preset) {
+    if ((state.hiddenPresetIds || []).includes(id)) return null;
     const override = row?.title != null ? String(row.title).trim() : "";
     return {
       id,
@@ -174,4 +191,27 @@ export function addCustomSessionInState(state: SessionsState, title: string): st
   state.customOrder = state.customOrder || [];
   state.customOrder.push(id);
   return id;
+}
+
+/** カスタムセッションのみ削除。プリセット id では false。 */
+export function removeCustomSessionFromState(state: SessionsState, id: string): boolean {
+  const row = state.byId[id] as { custom?: boolean } | undefined;
+  if (!row?.custom) return false;
+  const order = state.customOrder || [];
+  state.customOrder = order.filter((x) => x !== id);
+  delete state.byId[id];
+  return true;
+}
+
+/** プリセットは hiddenPresetIds に追加、カスタムは byId から削除。 */
+export function removeSessionFromState(state: SessionsState, id: string): boolean {
+  const preset = SESSION_PRESETS.find((p) => p.id === id);
+  if (preset) {
+    const cur = state.hiddenPresetIds || [];
+    if (cur.includes(id)) return false;
+    state.hiddenPresetIds = [...cur, id];
+    delete state.byId[id];
+    return true;
+  }
+  return removeCustomSessionFromState(state, id);
 }

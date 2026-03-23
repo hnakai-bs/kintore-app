@@ -313,9 +313,6 @@ function formatTrainerCommentDate(ymd: string): string {
         ×
       </button>
     </div>
-    <p class="site-comments-panel__hint">
-      閉じると一覧のコメントは閲覧済みになります。
-    </p>
     <p
       v-if="inbox.error"
       class="site-comments-panel__error"
@@ -348,9 +345,10 @@ function formatTrainerCommentDate(ymd: string): string {
           <span class="site-comments-panel__date">{{
             formatTrainerCommentDate(c.date)
           }}</span>
-          <span class="site-comments-panel__read-badge">{{
-            inbox.isCommentRead(c.id) ? "閲覧済み" : "未読"
-          }}</span>
+          <span
+            v-if="!inbox.isCommentRead(c.id)"
+            class="site-comments-panel__unread-badge"
+          >未読</span>
         </div>
         <p class="site-comments-panel__text">{{ c.text }}</p>
       </li>

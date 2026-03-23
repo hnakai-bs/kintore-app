@@ -1,4 +1,15 @@
 <script setup lang="ts">
+const route = useRoute();
+
+const isUsersSection = computed(
+  () =>
+    route.path === "/admin" || route.path.startsWith("/admin/users"),
+);
+
+const isExercisesSection = computed(() =>
+  route.path.startsWith("/admin/exercises"),
+);
+
 const { signOut, user } = useFirebaseAuth();
 
 async function onLogout() {
@@ -35,8 +46,32 @@ onBeforeUnmount(() => {
         </button>
       </div>
     </header>
-    <div class="admin-layout__main">
-      <slot />
+    <div class="admin-layout__shell">
+      <aside class="admin-layout__sidebar">
+        <nav class="admin-layout__nav" aria-label="管理メニュー">
+          <NuxtLink
+            to="/admin"
+            class="admin-layout__nav-link"
+            :class="{
+              'admin-layout__nav-link--active': isUsersSection,
+            }"
+          >
+            ユーザー一覧
+          </NuxtLink>
+          <NuxtLink
+            to="/admin/exercises"
+            class="admin-layout__nav-link"
+            :class="{
+              'admin-layout__nav-link--active': isExercisesSection,
+            }"
+          >
+            トレーニング種目管理
+          </NuxtLink>
+        </nav>
+      </aside>
+      <div class="admin-layout__main">
+        <slot />
+      </div>
     </div>
   </div>
 </template>

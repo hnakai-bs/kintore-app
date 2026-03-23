@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { KintoreExerciseCatalog } from "~/utils/exerciseCatalog";
 import {
   matchesExerciseSearch,
   resolveExerciseNameFromInput,
 } from "~/utils/exerciseSearch";
 
-const catalog = KintoreExerciseCatalog;
-const validNames = new Set(catalog.names());
+const exerciseCatalog = useTrainingExerciseCatalog();
+const validNames = computed(() => exerciseCatalog.nameSet.value);
+const allExerciseNames = computed(() => exerciseCatalog.names.value);
 
 const route = useRoute();
 const sessionId = computed(() => String(route.params.id || ""));
@@ -29,6 +29,8 @@ const editTitle = ref("");
 const exerciseLines = ref<string[]>([""]);
 const saveHint = ref(false);
 const persistError = ref<string | null>(null);
+const deleteSessionError = ref<string | null>(null);
+const deletingSession = ref(false);
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
 const draggedIndex = ref<number | null>(null);
@@ -45,7 +47,7 @@ function showSaved() {
 }
 
 function exercisesToPersist(lines: string[]) {
-  return lines.filter((n) => validNames.has(n));
+  return lines.filter((n) => validNames.value.has(n));
 }
 
 async function persistEdit() {
@@ -68,7 +70,7 @@ function syncEditorFromSession() {
   const s = kintoreSessions.getSession(sessionId.value);
   if (!s) return;
   editTitle.value = s.title;
-  const stored = (s.exercises || []).filter((n) => validNames.has(n));
+  const stored = (s.exercises || []).filter((n) => validNames.value.has(n));
   exerciseLines.value = stored.length ? [...stored] : [""];
 }
 
@@ -102,13 +104,13 @@ async function toggleMode() {
 const viewExercises = computed(() => {
   const s = session.value;
   if (!s) return [];
-  return (s.exercises || []).filter((n) => validNames.has(n));
+  return (s.exercises || []).filter((n) => validNames.value.has(n));
 });
 
 function guideUrl(name: string) {
   const n = String(name || "").trim();
-  if (!n || !validNames.has(n)) return "";
-  return catalog.guideUrl(n);
+  if (!n || !validNames.value.has(n)) return "";
+  return exerciseCatalog.guideUrl(n);
 }
 
 function addExerciseRow() {
@@ -126,8 +128,6 @@ function removeExerciseRow(i: number) {
   void persistEdit();
 }
 
-const allExerciseNames = catalog.names();
-
 const comboOpenIndex = ref<number | null>(null);
 const comboQuery = ref("");
 const comboBaseline = ref("");
@@ -135,8 +135,9 @@ let comboCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
 const filteredExerciseNamesForCombo = computed(() => {
   const q = comboQuery.value;
-  if (!q.trim()) return allExerciseNames;
-  return allExerciseNames.filter((n) => matchesExerciseSearch(n, q));
+  const names = allExerciseNames.value;
+  if (!q.trim()) return names;
+  return names.filter((n) => matchesExerciseSearch(n, q));
 });
 
 function clearComboTimer() {
@@ -152,9 +153,13 @@ function closeComboCommit() {
   const q = comboQuery.value.trim();
   let next = comboBaseline.value;
   if (q === "") next = "";
-  else if (validNames.has(q)) next = q;
+  else if (validNames.value.has(q)) next = q;
   else {
-    const resolved = resolveExerciseNameFromInput(q, validNames, allExerciseNames);
+    const resolved = resolveExerciseNameFromInput(
+      q,
+      validNames.value,
+      allExerciseNames.value,
+    );
     next = resolved ?? comboBaseline.value;
   }
   const prev = exerciseLines.value[i] ?? "";
@@ -210,10 +215,14 @@ function onExerciseComboKeydown(i: number, e: KeyboardEvent) {
     e.preventDefault();
     if (filtered.length === 1) {
       pickExerciseFromCombo(i, filtered[0]!);
-    } else if (validNames.has(t)) {
+    } else if (validNames.value.has(t)) {
       pickExerciseFromCombo(i, t);
     } else {
-      const resolved = resolveExerciseNameFromInput(t, validNames, allExerciseNames);
+      const resolved = resolveExerciseNameFromInput(
+        t,
+        validNames.value,
+        allExerciseNames.value,
+      );
       if (resolved) pickExerciseFromCombo(i, resolved);
     }
   }
@@ -319,12 +328,40 @@ watch(editing, (on) => {
 async function onVis() {
   if (document.visibilityState !== "visible" || editing.value) return;
   await kintoreSessions.refresh();
+  await exerciseCatalog.refresh();
   bumpSession();
 }
 
 function onPageShow(e: PageTransitionEvent) {
   if (e.persisted && !editing.value) {
-    void kintoreSessions.refresh().then(() => bumpSession());
+    void kintoreSessions
+      .refresh()
+      .then(() => exerciseCatalog.refresh())
+      .then(() => bumpSession());
+  }
+}
+
+async function confirmAndDeleteSession() {
+  const s = session.value;
+  if (!s) return;
+  if (
+    !confirm(
+      `「${s.title}」を削除しますか？\n一覧からも消え、この操作は取り消せません。`,
+    )
+  ) {
+    return;
+  }
+  deleteSessionError.value = null;
+  deletingSession.value = true;
+  try {
+    const res = await kintoreSessions.deleteSession(sessionId.value);
+    if (!res.ok) {
+      deleteSessionError.value = res.message;
+      return;
+    }
+    await navigateTo("/training-sessions");
+  } finally {
+    deletingSession.value = false;
   }
 }
 </script>
@@ -560,6 +597,27 @@ function onPageShow(e: PageTransitionEvent) {
       <p v-if="persistError" class="firestore-alert" role="alert">
         {{ persistError }}
       </p>
+    </div>
+
+    <div class="session-detail-delete">
+      <p class="session-detail-delete__note">
+        このセッションを削除すると、一覧からも消えます。
+      </p>
+      <p
+        v-if="deleteSessionError"
+        class="firestore-alert"
+        role="alert"
+      >
+        {{ deleteSessionError }}
+      </p>
+      <button
+        type="button"
+        class="session-detail-delete__btn"
+        :disabled="deletingSession"
+        @click="confirmAndDeleteSession"
+      >
+        {{ deletingSession ? "削除中…" : "このセッションを削除" }}
+      </button>
     </div>
   </main>
 </template>

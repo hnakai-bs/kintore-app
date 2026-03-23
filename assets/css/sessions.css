@@ -393,3 +393,46 @@
 .session-exercise-add:active {
   background: var(--surface-pressed);
 }
+
+/* カスタムセッション詳細のみ */
+.session-detail-delete {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.session-detail-delete__note {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.session-detail-delete__btn {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin-inline: auto;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #f0b4ae;
+  background: #fff5f5;
+  color: #c5221f;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.session-detail-delete__btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.session-detail-delete__btn:active:not(:disabled) {
+  background: #fce8e6;
+}

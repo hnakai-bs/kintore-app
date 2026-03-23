@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { KintoreExerciseCatalog } from "~/utils/exerciseCatalog";
 import {
   matchesExerciseSearch,
   resolveExerciseNameFromInput,
@@ -8,11 +7,13 @@ import {
 const { getDay: getTrainingDay, saveDay: saveTrainingDay } =
   useTrainingFirestore();
 const kintoreSessions = useKintoreSessions();
+const exerciseCatalog = useTrainingExerciseCatalog();
+const { user } = useFirebaseAuth();
 
 const SOURCE_NEW = "__new__";
 
-const EXERCISE_OPTIONS = KintoreExerciseCatalog.names();
-const validExerciseNames = new Set(EXERCISE_OPTIONS);
+const exerciseNamesList = computed(() => exerciseCatalog.names.value);
+const validExerciseNames = computed(() => exerciseCatalog.nameSet.value);
 
 type SetRow = { exercise: string; weight: number | ""; reps: number | "" };
 
@@ -22,7 +23,7 @@ function emptySet(): SetRow {
 
 function normalizeExercise(v: unknown) {
   const s = v != null ? String(v).trim() : "";
-  if (s === "" || EXERCISE_OPTIONS.includes(s)) return s;
+  if (s === "" || exerciseCatalog.isValidName(s)) return s;
   return "";
 }
 
@@ -89,6 +90,51 @@ const persistError = ref<string | null>(null);
 const sessionSource = ref(SOURCE_NEW);
 const lastSessionSourceValue = ref(SOURCE_NEW);
 
+function preferredSessionStorageKey(): string | null {
+  const uid = user.value?.uid;
+  return uid ? `kintore-preferred-training-session:${uid}` : null;
+}
+
+function loadPreferredSessionFromStorage(): string {
+  if (import.meta.server) return SOURCE_NEW;
+  const key = preferredSessionStorageKey();
+  if (!key) return SOURCE_NEW;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ?? SOURCE_NEW;
+  } catch {
+    return SOURCE_NEW;
+  }
+}
+
+function savePreferredSessionToStorage(id: string) {
+  const key = preferredSessionStorageKey();
+  if (!key) return;
+  try {
+    localStorage.setItem(key, id);
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+/** 保存済みのセッションIDがまだ存在するか確認し、ドロップダウンに反映（セット内容は変更しない） */
+function applyPreferredSessionIfValid() {
+  const raw = loadPreferredSessionFromStorage();
+  if (raw === SOURCE_NEW) {
+    sessionSource.value = SOURCE_NEW;
+    lastSessionSourceValue.value = SOURCE_NEW;
+    return;
+  }
+  if (!kintoreSessions.getSession(raw)) {
+    savePreferredSessionToStorage(SOURCE_NEW);
+    sessionSource.value = SOURCE_NEW;
+    lastSessionSourceValue.value = SOURCE_NEW;
+    return;
+  }
+  sessionSource.value = raw;
+  lastSessionSourceValue.value = raw;
+}
+
 const sessionsTick = ref(0);
 const sessionOptions = computed(() => {
   sessionsTick.value;
@@ -108,8 +154,9 @@ let exerciseComboCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
 const filteredExerciseNamesForTraining = computed(() => {
   const q = exerciseComboQuery.value;
-  if (!q.trim()) return EXERCISE_OPTIONS;
-  return EXERCISE_OPTIONS.filter((n) => matchesExerciseSearch(n, q));
+  const opts = exerciseNamesList.value;
+  if (!q.trim()) return opts;
+  return opts.filter((n) => matchesExerciseSearch(n, q));
 });
 
 function clearExerciseComboTimer() {
@@ -125,12 +172,12 @@ function closeTrainingExerciseCombo() {
   const q = exerciseComboQuery.value.trim();
   let next = exerciseComboBaseline.value;
   if (q === "") next = "";
-  else if (validExerciseNames.has(q)) next = q;
+  else if (validExerciseNames.value.has(q)) next = q;
   else {
     const resolved = resolveExerciseNameFromInput(
       q,
-      validExerciseNames,
-      EXERCISE_OPTIONS,
+      validExerciseNames.value,
+      exerciseNamesList.value,
     );
     next = resolved ?? exerciseComboBaseline.value;
   }
@@ -190,13 +237,13 @@ function onTrainingExerciseComboKeydown(i: number, e: KeyboardEvent) {
     e.preventDefault();
     if (filtered.length === 1) {
       pickTrainingExercise(i, filtered[0]!);
-    } else if (validExerciseNames.has(t)) {
+    } else if (validExerciseNames.value.has(t)) {
       pickTrainingExercise(i, t);
     } else {
       const resolved = resolveExerciseNameFromInput(
         t,
-        validExerciseNames,
-        EXERCISE_OPTIONS,
+        validExerciseNames.value,
+        exerciseNamesList.value,
       );
       if (resolved) pickTrainingExercise(i, resolved);
     }
@@ -226,17 +273,12 @@ async function loadSetsForCurrentDate() {
   }
 }
 
-function resetTrainingSourceSelect() {
-  sessionSource.value = SOURCE_NEW;
-  lastSessionSourceValue.value = SOURCE_NEW;
-}
-
 async function applySessionTemplate(sessionId: string) {
   if (!sessionId || sessionId === SOURCE_NEW) return;
   const sess = kintoreSessions.getSession(sessionId);
   if (!sess) return;
   const names = (sess.exercises || []).filter((n) =>
-    EXERCISE_OPTIONS.includes(String(n).trim()),
+    exerciseCatalog.isValidName(String(n).trim()),
   );
   sets.value =
     names.length > 0
@@ -254,12 +296,13 @@ function hasAnySetInput() {
   });
 }
 
-function onSessionSourceChange() {
+async function onSessionSourceChange() {
   const v = sessionSource.value;
   const prev = lastSessionSourceValue.value;
   if (v === prev) return;
   if (v === SOURCE_NEW) {
     lastSessionSourceValue.value = v;
+    savePreferredSessionToStorage(SOURCE_NEW);
     return;
   }
   if (hasAnySetInput()) {
@@ -271,8 +314,9 @@ function onSessionSourceChange() {
       return;
     }
   }
-  void applySessionTemplate(v);
+  await applySessionTemplate(v);
   lastSessionSourceValue.value = v;
+  savePreferredSessionToStorage(v);
 }
 
 function addSet() {
@@ -319,7 +363,7 @@ function onRepsInput(i: number, e: Event) {
 function exerciseGuideUrl(ex: string) {
   const n = normalizeExercise(ex);
   if (!n) return null;
-  const url = KintoreExerciseCatalog.guideUrl(n);
+  const url = exerciseCatalog.guideUrl(n);
   return url || null;
 }
 
@@ -417,21 +461,30 @@ function goDay(delta: number) {
 async function onVisibility() {
   if (document.visibilityState === "visible") {
     await kintoreSessions.refresh();
+    await exerciseCatalog.refresh();
     bumpSessionOptions();
+    applyPreferredSessionIfValid();
   }
 }
+
+watch(
+  () => [kintoreSessions.ready.value, user.value?.uid] as const,
+  () => {
+    if (!kintoreSessions.ready.value) return;
+    applyPreferredSessionIfValid();
+  },
+  { immediate: true },
+);
 
 watch(currentDate, () => {
   persistError.value = null;
   clearExerciseComboTimer();
   exerciseComboOpenIndex.value = null;
   void loadSetsForCurrentDate();
-  resetTrainingSourceSelect();
 });
 
 onMounted(() => {
   void loadSetsForCurrentDate();
-  lastSessionSourceValue.value = sessionSource.value;
   const el = calendarDialog.value;
   if (el) {
     el.addEventListener("close", () => {

@@ -10,6 +10,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "体重 (kg)",
     unit: "kg",
     color: "#2563eb",
+    iconSrc: "/icons/weight.png",
   },
   {
     id: "chart-calories",
@@ -19,6 +20,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "カロリー (kcal)",
     unit: "kcal",
     color: "#0d9488",
+    iconSrc: "/icons/calorie.png",
   },
   {
     id: "chart-protein",
@@ -28,6 +30,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "タンパク質 (g)",
     unit: "g",
     color: "#db2777",
+    iconSrc: "/icons/protein.png",
   },
   {
     id: "chart-fat",
@@ -37,6 +40,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "脂質 (g)",
     unit: "g",
     color: "#ea580c",
+    iconSrc: "/icons/lipid.png",
   },
   {
     id: "chart-carbs",
@@ -46,6 +50,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "炭水化物 (g)",
     unit: "g",
     color: "#4f46e5",
+    iconSrc: "/icons/carbohydrates.png",
   },
   {
     id: "chart-fiber",
@@ -55,6 +60,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "食物繊維 (g)",
     unit: "g",
     color: "#16a34a",
+    iconSrc: "/icons/dietary_fiber.png",
   },
   {
     id: "chart-sleep",
@@ -64,6 +70,7 @@ export const CONDITION_CHART_METAS = [
     legendLabel: "睡眠時間 (h)",
     unit: "h",
     color: "#7c3aed",
+    iconSrc: "/icons/sleep.png",
   },
 ] as const;
 
