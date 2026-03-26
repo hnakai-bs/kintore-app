@@ -42,6 +42,12 @@ html.auth-ui body {
   --c-sleep: #7c3aed;
 }
 
+/* コメントの「顔＋」は <img> の黒 SVG のため、ダーク時は反転で白表示 */
+:root[data-user-theme="dark"] .site-comments-panel__face-add-img {
+  filter: invert(1);
+  opacity: 0.92;
+}
+
 :root[data-user-theme="dark"] .bodypart-tag {
   color: #93c5fd;
   background: rgba(96, 165, 250, 0.14);
