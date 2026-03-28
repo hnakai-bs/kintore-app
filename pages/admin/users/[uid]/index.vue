@@ -3,7 +3,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { displayGoalsFromProfile } from "~/utils/displayGoalsFromProfile";
 import { formatTrainingDaySummary } from "~/utils/formatTrainingDaySummary";
 import {
-  countTrainingSetsInMonth,
+  countTrainingDaysInMonth,
   bodyPartSetCountsForMonth,
   monthBoundsYmd,
 } from "~/utils/trainingMetrics";
@@ -74,9 +74,14 @@ type TrainingRow = { dateYmd: string; labelJa: string; summary: string };
 const trainingLoading = ref(false);
 const trainingError = ref("");
 const trainingRows = ref<TrainingRow[]>([]);
+
+/** 内容（重量・回数ありのセット要約）が1件以上ある日だけテーブルに出す */
+const trainingRowsWithContent = computed(() =>
+  trainingRows.value.filter((r) => r.summary !== "—"),
+);
 /** `<input type="month">` 用 `yyyy-MM` */
 const trainingMonthYm = ref("");
-const trainingSetCountMonth = ref(0);
+const trainingDaysInMonth = ref(0);
 const trainingBodyPartSlices = ref<{ label: string; count: number }[]>([]);
 
 const bodyLoading = ref(false);
@@ -170,7 +175,7 @@ async function loadTrainingForSelectedMonth() {
   trainingLoading.value = true;
   trainingError.value = "";
   trainingRows.value = [];
-  trainingSetCountMonth.value = 0;
+  trainingDaysInMonth.value = 0;
   trainingBodyPartSlices.value = [];
   if (!uid.value) {
     trainingLoading.value = false;
@@ -189,7 +194,7 @@ async function loadTrainingForSelectedMonth() {
     const map = await trainingFs.fetchRange(startYmd, endYmd, {
       forUserId: uid.value,
     });
-    trainingSetCountMonth.value = countTrainingSetsInMonth(map, year, month);
+    trainingDaysInMonth.value = countTrainingDaysInMonth(map, year, month);
     trainingBodyPartSlices.value = bodyPartSetCountsForMonth(
       map,
       year,
@@ -364,7 +369,7 @@ watch(
     activeTab.value = "condition";
     trainingRows.value = [];
     trainingError.value = "";
-    trainingSetCountMonth.value = 0;
+    trainingDaysInMonth.value = 0;
     trainingBodyPartSlices.value = [];
     bodyEntries.value = [];
     bodyError.value = "";
@@ -549,10 +554,10 @@ useHead(
         <template v-else-if="!trainingLoading && trainingMonthYm">
           <p class="admin-training-summary" role="status">
             <span class="admin-training-summary__label">
-              {{ formatYearMonthJa(trainingMonthYm) }}のトレーニング回数
+              {{ formatYearMonthJa(trainingMonthYm) }}のトレーニング日数
             </span>
-            <span class="admin-training-summary__num">{{ trainingSetCountMonth }}</span>
-            <span class="admin-training-summary__unit">回</span>
+            <span class="admin-training-summary__num">{{ trainingDaysInMonth }}</span>
+            <span class="admin-training-summary__unit">日</span>
           </p>
           <AdminTrainingExercisePie
             v-if="trainingBodyPartSlices.length > 0"
@@ -570,7 +575,22 @@ useHead(
           この月のトレーニング記録はありません。
         </div>
         <div
-          v-else-if="!trainingLoading && !trainingError && trainingRows.length > 0"
+          v-else-if="
+            !trainingLoading &&
+              !trainingError &&
+              trainingRows.length > 0 &&
+              trainingRowsWithContent.length === 0
+          "
+          class="admin-user-detail__empty"
+        >
+          この月は、重量・回数が入力されたセットがある日はありません。
+        </div>
+        <div
+          v-else-if="
+            !trainingLoading &&
+              !trainingError &&
+              trainingRowsWithContent.length > 0
+          "
           class="admin-training-table-wrap"
         >
           <table class="admin-training-table">
@@ -581,7 +601,7 @@ useHead(
               </tr>
             </thead>
             <tbody>
-              <tr v-for="r in trainingRows" :key="r.dateYmd">
+              <tr v-for="r in trainingRowsWithContent" :key="r.dateYmd">
                 <td class="admin-training-table__date">
                   <span class="admin-training-table__date-primary">{{
                     r.labelJa

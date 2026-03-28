@@ -113,6 +113,8 @@ for (let i = 0; i < seed.length; i += 1) {
     guideUrl: String(row.guideUrl || "").trim(),
     sortOrder: i,
   };
+  const bp = String(row.bodyPart ?? "").trim();
+  if (bp) doc.bodyPart = bp;
   if (!doc.name) continue;
   console.error(`${dryRun ? "[dry-run]" : ""} ${id}: ${doc.name}`);
   if (!dryRun) {

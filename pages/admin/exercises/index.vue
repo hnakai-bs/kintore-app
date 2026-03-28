@@ -35,55 +35,80 @@ function clearSearch() {
   searchApplied.value = "";
 }
 
-/** 一覧からの編集のみ（新規はモーダル） */
-const formName = ref("");
-const formGuideUrl = ref("");
+const exerciseModalRef = ref<HTMLDialogElement | null>(null);
+const exerciseModalMode = ref<"add" | "edit">("add");
+const isExerciseModalOpen = ref(false);
 const editingId = ref<string | null>(null);
-
-const addModalRef = ref<HTMLDialogElement | null>(null);
-/** 新規モーダル表示中（エラー表示位置の切り替え用） */
-const isAddModalOpen = ref(false);
 const modalName = ref("");
 const modalGuideUrl = ref("");
+const modalBodyPart = ref("");
 
-function resetEditForm() {
-  formName.value = "";
-  formGuideUrl.value = "";
+const rows = computed(() => [...entries.value]);
+
+/** Firestore に既に入っている部位ラベルのユニーク一覧（ソート済み） */
+const distinctBodyPartsFromData = computed(() => {
+  const set = new Set<string>();
+  for (const r of rows.value) {
+    const p = String(r.bodyPart ?? "").trim();
+    if (p) set.add(p);
+  }
+  return [...set].sort((a, b) => a.localeCompare(b, "ja"));
+});
+
+/** プルダウン用：既存部位＋現在モーダルで選んでいる値（一覧に無い旧データ向け） */
+const bodyPartSelectOptions = computed(() => {
+  const base = distinctBodyPartsFromData.value;
+  const cur = modalBodyPart.value.trim();
+  if (cur && !base.includes(cur)) {
+    return [...base, cur].sort((a, b) => a.localeCompare(b, "ja"));
+  }
+  return base;
+});
+
+function resetModalFields() {
+  modalName.value = "";
+  modalGuideUrl.value = "";
+  modalBodyPart.value = "";
   editingId.value = null;
 }
 
-function resetForm() {
-  resetEditForm();
+function openExerciseModalAdd() {
+  exerciseModalMode.value = "add";
+  resetModalFields();
   saveError.value = null;
+  isExerciseModalOpen.value = true;
+  exerciseModalRef.value?.showModal();
 }
 
-function startEdit(row: { id: string; name: string; guideUrl: string }) {
+function openExerciseModalEdit(row: {
+  id: string;
+  name: string;
+  guideUrl: string;
+  bodyPart: string;
+}) {
+  exerciseModalMode.value = "edit";
   editingId.value = row.id;
-  formName.value = row.name;
-  formGuideUrl.value = row.guideUrl;
+  modalName.value = row.name;
+  modalGuideUrl.value = row.guideUrl;
+  modalBodyPart.value = String(row.bodyPart ?? "").trim();
   saveError.value = null;
+  isExerciseModalOpen.value = true;
+  exerciseModalRef.value?.showModal();
 }
 
-function openAddModal() {
-  modalName.value = "";
-  modalGuideUrl.value = "";
+function closeExerciseModal() {
+  exerciseModalRef.value?.close();
+}
+
+function onExerciseModalClosed() {
+  isExerciseModalOpen.value = false;
   saveError.value = null;
-  isAddModalOpen.value = true;
-  addModalRef.value?.showModal();
+  resetModalFields();
 }
 
-function closeAddModal() {
-  addModalRef.value?.close();
-}
-
-function onAddModalClosed() {
-  isAddModalOpen.value = false;
-  saveError.value = null;
-}
-
-function onAddModalBackdrop(e: MouseEvent) {
-  if (e.target === addModalRef.value) {
-    closeAddModal();
+function onExerciseModalBackdrop(e: MouseEvent) {
+  if (e.target === exerciseModalRef.value) {
+    closeExerciseModal();
   }
 }
 
@@ -101,8 +126,6 @@ onMounted(() => {
   void loadList();
 });
 
-const rows = computed(() => [...entries.value]);
-
 const filteredRows = computed(() => {
   const q = searchApplied.value;
   if (!q.trim()) return rows.value;
@@ -114,6 +137,18 @@ function nameTaken(name: string, exceptId: string | null): boolean {
   return rows.value.some((r) => r.name === t && r.id !== exceptId);
 }
 
+function bodyPartForFirestore(): string {
+  return modalBodyPart.value.trim();
+}
+
+async function submitExerciseModal() {
+  if (exerciseModalMode.value === "add") {
+    await submitAdd();
+  } else {
+    await submitEdit();
+  }
+}
+
 async function submitAdd() {
   const db = nuxtApp.$firestoreDb;
   if (!db) {
@@ -122,6 +157,7 @@ async function submitAdd() {
   }
   const name = modalName.value.trim();
   const guideUrl = modalGuideUrl.value.trim();
+  const bodyPart = bodyPartForFirestore();
   if (!name) {
     saveError.value = "種目名を入力してください。";
     return;
@@ -138,12 +174,14 @@ async function submitAdd() {
       (m, r) => Math.max(m, r.sortOrder),
       -1,
     );
-    await addDoc(collection(db, "trainingExercises"), {
+    const payload: Record<string, unknown> = {
       name,
       guideUrl,
       sortOrder: maxOrder + 1,
-    });
-    closeAddModal();
+    };
+    if (bodyPart) payload.bodyPart = bodyPart;
+    await addDoc(collection(db, "trainingExercises"), payload);
+    closeExerciseModal();
     await refreshCatalog();
   } catch (e) {
     saveError.value =
@@ -161,8 +199,9 @@ async function submitEdit() {
   }
   if (!editingId.value) return;
 
-  const name = formName.value.trim();
-  const guideUrl = formGuideUrl.value.trim();
+  const name = modalName.value.trim();
+  const guideUrl = modalGuideUrl.value.trim();
+  const bodyPart = bodyPartForFirestore();
   if (!name) {
     saveError.value = "種目名を入力してください。";
     return;
@@ -178,8 +217,9 @@ async function submitEdit() {
     await updateDoc(doc(db, "trainingExercises", editingId.value), {
       name,
       guideUrl,
+      bodyPart,
     });
-    resetEditForm();
+    closeExerciseModal();
     await refreshCatalog();
   } catch (e) {
     saveError.value =
@@ -201,7 +241,7 @@ async function onDelete(id: string, title: string) {
   loading.value = true;
   try {
     await deleteDoc(doc(db, "trainingExercises", id));
-    if (wasEditing) resetEditForm();
+    if (wasEditing) closeExerciseModal();
     await refreshCatalog();
   } catch (e) {
     saveError.value =
@@ -211,10 +251,11 @@ async function onDelete(id: string, title: string) {
   }
 }
 
-function cancelEdit() {
-  resetEditForm();
-  saveError.value = null;
-}
+const exerciseModalTitle = computed(() =>
+  exerciseModalMode.value === "add"
+    ? "トレーニング種目を新規登録"
+    : "トレーニング種目を編集",
+);
 </script>
 
 <template>
@@ -271,7 +312,7 @@ function cancelEdit() {
           type="button"
           class="admin-user-comments-toolbar__new"
           :disabled="loading"
-          @click="openAddModal"
+          @click="openExerciseModalAdd"
         >
           新規登録
         </button>
@@ -279,17 +320,17 @@ function cancelEdit() {
     </div>
 
     <dialog
-      ref="addModalRef"
+      ref="exerciseModalRef"
       class="admin-exercises-modal"
       aria-labelledby="admin-exercises-modal-title"
-      @click="onAddModalBackdrop"
-      @close="onAddModalClosed"
+      @click="onExerciseModalBackdrop"
+      @close="onExerciseModalClosed"
     >
       <div class="admin-exercises-modal__panel" @click.stop>
         <h2 id="admin-exercises-modal-title" class="admin-exercises-modal__title">
-          トレーニング種目を新規登録
+          {{ exerciseModalTitle }}
         </h2>
-        <form class="admin-exercises-form" @submit.prevent="submitAdd">
+        <form class="admin-exercises-form" @submit.prevent="submitExerciseModal">
           <div class="admin-exercises-form__row">
             <label class="admin-exercises-form__label" for="ex-modal-name">種目名</label>
             <input
@@ -301,6 +342,29 @@ function cancelEdit() {
               autocomplete="off"
               required
             >
+          </div>
+          <div class="admin-exercises-form__row">
+            <label class="admin-exercises-form__label" for="ex-modal-bodypart">部位</label>
+            <select
+              id="ex-modal-bodypart"
+              v-model="modalBodyPart"
+              class="admin-exercises-form__input admin-exercises-form__select"
+              aria-label="部位"
+            >
+              <option value="">
+                未設定
+              </option>
+              <option
+                v-for="p in bodyPartSelectOptions"
+                :key="p"
+                :value="p"
+              >
+                {{ p }}
+              </option>
+            </select>
+            <p class="admin-exercises-form__hint">
+              選択肢は、現在登録済みの種目に入っている部位から自動で集めています。
+            </p>
           </div>
           <div class="admin-exercises-form__row">
             <label class="admin-exercises-form__label" for="ex-modal-url">フォーム解説URL</label>
@@ -315,7 +379,7 @@ function cancelEdit() {
             >
           </div>
           <p
-            v-if="saveError && isAddModalOpen"
+            v-if="saveError && isExerciseModalOpen"
             class="admin-exercises-modal__error"
             role="alert"
           >
@@ -326,7 +390,7 @@ function cancelEdit() {
               type="button"
               class="admin-exercises-form__cancel"
               :disabled="loading"
-              @click="closeAddModal"
+              @click="closeExerciseModal"
             >
               キャンセル
             </button>
@@ -335,68 +399,15 @@ function cancelEdit() {
               class="admin-table-btn admin-table-btn--detail"
               :disabled="loading"
             >
-              登録
+              {{ exerciseModalMode === "add" ? "登録" : "保存" }}
             </button>
           </div>
         </form>
       </div>
     </dialog>
 
-    <section
-      v-if="editingId"
-      class="card admin-exercises-form-card"
-      aria-labelledby="ex-edit-h"
-    >
-      <h2 id="ex-edit-h" class="section-title">
-        種目を編集
-      </h2>
-      <form class="admin-exercises-form" @submit.prevent="submitEdit">
-        <div class="admin-exercises-form__row">
-          <label class="admin-exercises-form__label" for="ex-name">種目名</label>
-          <input
-            id="ex-name"
-            v-model="formName"
-            type="text"
-            class="admin-exercises-form__input"
-            maxlength="120"
-            autocomplete="off"
-            required
-          >
-        </div>
-        <div class="admin-exercises-form__row">
-          <label class="admin-exercises-form__label" for="ex-url">フォーム解説URL</label>
-          <input
-            id="ex-url"
-            v-model="formGuideUrl"
-            type="url"
-            class="admin-exercises-form__input"
-            maxlength="2000"
-            placeholder="https://"
-            autocomplete="off"
-          >
-        </div>
-        <div class="admin-exercises-form__actions">
-          <button
-            type="submit"
-            class="admin-table-btn admin-table-btn--detail"
-            :disabled="loading"
-          >
-            保存
-          </button>
-          <button
-            type="button"
-            class="admin-exercises-form__cancel"
-            :disabled="loading"
-            @click="cancelEdit"
-          >
-            キャンセル
-          </button>
-        </div>
-      </form>
-    </section>
-
     <p
-      v-if="saveError && !isAddModalOpen"
+      v-if="saveError && !isExerciseModalOpen"
       class="admin-page__error"
       role="alert"
     >
@@ -420,6 +431,7 @@ function cancelEdit() {
         <thead>
           <tr>
             <th scope="col">種目名</th>
+            <th scope="col">部位</th>
             <th scope="col">フォーム解説URL</th>
             <th scope="col" class="admin-user-table__actions-head">操作</th>
           </tr>
@@ -427,6 +439,10 @@ function cancelEdit() {
         <tbody>
           <tr v-for="r in filteredRows" :key="r.id">
             <td>{{ r.name }}</td>
+            <td class="admin-exercises-table__bodypart">
+              <span v-if="r.bodyPart">{{ r.bodyPart }}</span>
+              <span v-else class="admin-user-table__muted">—</span>
+            </td>
             <td class="admin-exercises-table__url">
               <a
                 v-if="r.guideUrl"
@@ -442,7 +458,7 @@ function cancelEdit() {
                 type="button"
                 class="admin-table-btn admin-table-btn--detail"
                 :disabled="loading"
-                @click="startEdit(r)"
+                @click="openExerciseModalEdit(r)"
               >
                 編集
               </button>
@@ -633,10 +649,6 @@ function cancelEdit() {
   margin-top: 4px;
 }
 
-.admin-exercises-form-card {
-  margin-bottom: 20px;
-}
-
 .admin-exercises-form {
   display: flex;
   flex-direction: column;
@@ -655,6 +667,13 @@ function cancelEdit() {
   color: var(--text-muted);
 }
 
+.admin-exercises-form__hint {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--text-muted, #737373);
+}
+
 .admin-exercises-form__input {
   width: 100%;
   max-width: 100%;
@@ -663,6 +682,12 @@ function cancelEdit() {
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 0.875rem;
+}
+
+.admin-exercises-form__select {
+  cursor: pointer;
+  background: var(--surface, #fff);
+  color: var(--text);
 }
 
 .admin-exercises-form__actions {
@@ -685,6 +710,11 @@ function cancelEdit() {
 
 .admin-exercises-table-wrap {
   margin-top: 8px;
+}
+
+.admin-exercises-table__bodypart {
+  white-space: nowrap;
+  font-size: 0.875rem;
 }
 
 .admin-exercises-table__url {

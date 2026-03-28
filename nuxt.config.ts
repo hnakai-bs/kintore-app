@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: "ja" },
-      title: "DAIKI Fit",
+      title: "RE-BIRTH",
       meta: [
         { charset: "utf-8" },
         {

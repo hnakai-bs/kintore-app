@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Chart, registerables, type Chart as ChartType } from "chart.js";
+import { chartBackgroundColorForBodyPart } from "~/utils/trainingBodyPartColors";
 
 Chart.register(...registerables);
 
@@ -24,23 +25,6 @@ function readChartTheme() {
   return { legendColor: legend, sliceBorder };
 }
 
-const PALETTE = [
-  "#2563eb",
-  "#db2777",
-  "#ea580c",
-  "#16a34a",
-  "#7c3aed",
-  "#0d9488",
-  "#ca8a04",
-  "#64748b",
-  "#4f46e5",
-  "#059669",
-];
-
-function colorsFor(n: number) {
-  return Array.from({ length: n }, (_, i) => PALETTE[i % PALETTE.length]);
-}
-
 function draw() {
   const canvas = canvasRef.value;
   if (!canvas) return;
@@ -59,7 +43,9 @@ function draw() {
       datasets: [
         {
           data: props.slices.map((s) => s.count),
-          backgroundColor: colorsFor(props.slices.length),
+          backgroundColor: props.slices.map((s) =>
+            chartBackgroundColorForBodyPart(s.label),
+          ),
           borderWidth: 1,
           borderColor: sliceBorder,
         },

@@ -18,6 +18,11 @@ import {
   type FirestorePersistResult,
 } from "~/utils/firestorePersist";
 
+export type TrainingDayDoc = {
+  sets: unknown[];
+  memo: string;
+};
+
 export function useTrainingFirestore() {
   const nuxtApp = useNuxtApp();
   const { user, waitUntilReady } = useFirebaseAuth();
@@ -74,20 +79,23 @@ export function useTrainingFirestore() {
     }));
   }
 
-  async function getDay(dateYmd: string): Promise<unknown[] | null> {
+  async function getDay(dateYmd: string): Promise<TrainingDayDoc | null> {
     await waitUntilReady();
     const uid = user.value?.uid;
     const db = nuxtApp.$firestoreDb;
     if (!uid || !db) return null;
     const snap = await getDoc(doc(db, "users", uid, "training", dateYmd));
     if (!snap.exists()) return null;
-    const sets = (snap.data() as { sets?: unknown }).sets;
-    return Array.isArray(sets) ? sets : [];
+    const data = snap.data() as { sets?: unknown; memo?: unknown };
+    const sets = Array.isArray(data.sets) ? data.sets : [];
+    const memoRaw = data.memo != null ? String(data.memo) : "";
+    return { sets, memo: memoRaw };
   }
 
   async function saveDay(
     dateYmd: string,
     sets: unknown[],
+    memo: string,
   ): Promise<FirestorePersistResult> {
     await waitUntilReady();
     const uid = user.value?.uid;
@@ -97,7 +105,10 @@ export function useTrainingFirestore() {
     try {
       await setDoc(
         doc(db, "users", uid, "training", dateYmd),
-        { sets: JSON.parse(JSON.stringify(sets)) },
+        {
+          sets: JSON.parse(JSON.stringify(sets)),
+          memo,
+        },
         { merge: true },
       );
       return firestoreOk();

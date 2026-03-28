@@ -207,7 +207,7 @@ function formatTrainerCommentDate(ymd: string): string {
 <template>
   <header class="site-header">
     <div class="site-header__top">
-      <NuxtLink to="/" class="site-logo" aria-label="ホーム（DAIKI Fit）">
+      <NuxtLink to="/" class="site-logo" aria-label="ホーム（RE-BIRTH）">
         <span class="site-logo__mark" aria-hidden="true">
           <img
             src="/daiki-fit.png"
@@ -218,7 +218,7 @@ function formatTrainerCommentDate(ymd: string): string {
             decoding="async"
           />
         </span>
-        <span class="site-logo__text">DAIKI Fit</span>
+        <span class="site-logo__text">RE-BIRTH</span>
       </NuxtLink>
       <div class="site-header__actions">
         <button

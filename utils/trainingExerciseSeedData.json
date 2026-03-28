@@ -1,78 +1,362 @@
 [
-  { "name": "ベンチプレス", "guideUrl": "https://www.training-manual-bl.com/bench-press/" },
-  { "name": "インクラインダンベルプレス", "guideUrl": "https://www.training-manual-bl.com/incline-dumbbell-press/" },
-  { "name": "マシンチェストプレス", "guideUrl": "https://www.training-manual-bl.com/machine-chest-press/" },
-  { "name": "ケーブルクロスオーバー", "guideUrl": "https://www.training-manual-bl.com/cable-crossover/" },
-  { "name": "ミリタリープレス", "guideUrl": "https://www.training-manual-bl.com/military-press/" },
-  { "name": "アップライトロウ", "guideUrl": "https://www.training-manual-bl.com/upright-row/" },
-  { "name": "サイドレイズ", "guideUrl": "https://www.training-manual-bl.com/side-raise-dumbbell/" },
-  { "name": "リアレイズ", "guideUrl": "https://www.training-manual-bl.com/rear-raise-machine/" },
-  { "name": "デッドリフト", "guideUrl": "https://www.training-manual-bl.com/deadlift/" },
-  { "name": "ラットプルダウン", "guideUrl": "https://www.training-manual-bl.com/lat-pulldown/" },
-  { "name": "シーテッドローイング", "guideUrl": "https://www.training-manual-bl.com/seated-rowing/" },
-  { "name": "ストレートアームプルダウン", "guideUrl": "https://www.training-manual-bl.com/straight-arm-pulldown/" },
-  { "name": "クローズグリップベンチ", "guideUrl": "https://www.training-manual-bl.com/close-grip-bench-press/" },
-  { "name": "トライセップスプッシュダウン", "guideUrl": "https://www.training-manual-bl.com/triceps-pushdown/" },
-  { "name": "バーベルスクワット", "guideUrl": "https://www.training-manual-bl.com/barbell-squat/" },
-  { "name": "ブルガリアンスクワット", "guideUrl": "https://www.training-manual-bl.com/bulgarian-squat/" },
-  { "name": "ルーマニアンデッドリフト（ダンベル）", "guideUrl": "https://www.training-manual-bl.com/dumbbell-romanian-deadlift/" },
-  { "name": "レッグエクステンション", "guideUrl": "https://www.training-manual-bl.com/leg-extension/" },
-  { "name": "インクラインダンベルカール", "guideUrl": "https://www.training-manual-bl.com/incline-dumbbell-curl/" },
-  { "name": "ハンマーカール", "guideUrl": "https://www.training-manual-bl.com/hammer-curl/" },
-  { "name": "インクラインベンチプレス", "guideUrl": "" },
-  { "name": "スミスマシンインクラインベンチプレス", "guideUrl": "" },
-  { "name": "インクラインダンベルフライ", "guideUrl": "" },
-  { "name": "ダンベルベンチプレス", "guideUrl": "" },
-  { "name": "ダンベルフライ", "guideUrl": "" },
-  { "name": "マシンペックフライ", "guideUrl": "" },
-  { "name": "ディップス", "guideUrl": "" },
-  { "name": "チンニング", "guideUrl": "" },
-  { "name": "ラットプルダウン（アンダーハンド）", "guideUrl": "" },
-  { "name": "ラットプルダウン（クローズグリップ）", "guideUrl": "" },
-  { "name": "ベントオーバーローイング", "guideUrl": "" },
-  { "name": "ダンベルローイング", "guideUrl": "" },
-  { "name": "ラットプルダウン（ビハインドネック）", "guideUrl": "" },
-  { "name": "ハーフデッドリフト", "guideUrl": "" },
-  { "name": "ダンベルデッドリフト", "guideUrl": "" },
-  { "name": "バーベルシュラッグ", "guideUrl": "" },
-  { "name": "ダンベルシュラッグ", "guideUrl": "" },
-  { "name": "ショルダープレス（スミスマシン）", "guideUrl": "" },
-  { "name": "ショルダープレス（ダンベル）", "guideUrl": "" },
-  { "name": "ショルダープレス（マシン）", "guideUrl": "" },
-  { "name": "スタンディングアーノルドプレス", "guideUrl": "" },
-  { "name": "フロントレイズ（ダンベル）", "guideUrl": "" },
-  { "name": "フロントレイズ（ケーブル）", "guideUrl": "" },
-  { "name": "インクラインフロントレイズ", "guideUrl": "" },
-  { "name": "サイドレイズ（ダンベル）", "guideUrl": "" },
-  { "name": "アップライトロウ（ケーブル）", "guideUrl": "" },
-  { "name": "リアレイズ（ダンベル）", "guideUrl": "" },
-  { "name": "リアレイズ（マシン）", "guideUrl": "" },
-  { "name": "クローズグリップベンチプレス", "guideUrl": "" },
-  { "name": "ライイングトライセップスエクステンション", "guideUrl": "" },
-  { "name": "トライセップスプッシュダウン（ロープ）", "guideUrl": "" },
-  { "name": "ダンベルフレンチプレス", "guideUrl": "" },
-  { "name": "トライセップスキックバック", "guideUrl": "" },
-  { "name": "ナロープッシュアップ", "guideUrl": "" },
-  { "name": "ベンチディップス", "guideUrl": "" },
-  { "name": "アームカール（ダンベル）", "guideUrl": "" },
-  { "name": "アームカール（ケーブル）", "guideUrl": "" },
-  { "name": "リバースアームカール（ケーブル）", "guideUrl": "" },
-  { "name": "リバースアームカール（ダンベル）", "guideUrl": "" },
-  { "name": "クランチ", "guideUrl": "" },
-  { "name": "ケーブルクランチ", "guideUrl": "" },
-  { "name": "レッグレイズ", "guideUrl": "" },
-  { "name": "レッグレイズ（平行棒）", "guideUrl": "" },
-  { "name": "ハンギングレッグレイズ", "guideUrl": "" },
-  { "name": "アブローラー", "guideUrl": "" },
-  { "name": "ロシアンツイスト", "guideUrl": "" },
-  { "name": "ケーブルウッドチョップ", "guideUrl": "" },
-  { "name": "スミスマシンスクワット", "guideUrl": "" },
-  { "name": "レッグプレス", "guideUrl": "" },
-  { "name": "ダンベルランジ", "guideUrl": "" },
-  { "name": "ダンベルスクワット", "guideUrl": "" },
-  { "name": "ライイングレッグカール", "guideUrl": "" },
-  { "name": "ダンベルルーマニアンデッドリフト", "guideUrl": "" },
-  { "name": "スミスマシンワイドスクワット", "guideUrl": "" },
-  { "name": "マシンアダクション", "guideUrl": "" },
-  { "name": "ゴブレットスクワット", "guideUrl": "" }
+  {
+    "name": "インクラインベンチプレス",
+    "guideUrl": "https://www.training-manual-bl.com/incline-bench-press/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "インクラインダンベルプレス",
+    "guideUrl": "https://www.training-manual-bl.com/incline-dumbbell-press/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "スミスマシンインクラインベンチプレス",
+    "guideUrl": "https://www.training-manual-bl.com/?p=35",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "インクラインダンベルフライ",
+    "guideUrl": "https://www.training-manual-bl.com/incline-dumbbell-flyes/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "ベンチプレス",
+    "guideUrl": "https://www.training-manual-bl.com/bench-press/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "ダンベルベンチプレス",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-bench-press/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "マシンチェストプレス",
+    "guideUrl": "https://www.training-manual-bl.com/machine-chest-press/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "ダンベルフライ",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-flyes/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "マシンペックフライ",
+    "guideUrl": "https://www.training-manual-bl.com/machine-pec-fly/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "ディップス",
+    "guideUrl": "https://www.training-manual-bl.com/dips/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "ケーブルクロスオーバー",
+    "guideUrl": "https://www.training-manual-bl.com/cable-crossover/",
+    "bodyPart": "胸"
+  },
+  {
+    "name": "チンニング",
+    "guideUrl": "https://www.training-manual-bl.com/chinning-chin-ups/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ラットプルダウン",
+    "guideUrl": "https://www.training-manual-bl.com/lat-pulldown/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ラットプルダウン（アンダーハンド）",
+    "guideUrl": "https://www.training-manual-bl.com/lat-pulldown-underhand/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ラットプルダウン（クローズグリップ）",
+    "guideUrl": "https://www.training-manual-bl.com/lat-pulldown-close-grip/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ベントオーバーローイング",
+    "guideUrl": "https://www.training-manual-bl.com/bent-over-rowing/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ダンベルローイング",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-rowing/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "シーテッドローイング",
+    "guideUrl": "https://www.training-manual-bl.com/seated-rowing/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ストレートアームプルダウン",
+    "guideUrl": "https://www.training-manual-bl.com/straight-arm-pulldown/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ラットプルダウン（ビハインドネック）",
+    "guideUrl": "https://www.training-manual-bl.com/lat-pulldown-behind-neck/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "デッドリフト",
+    "guideUrl": "https://www.training-manual-bl.com/deadlift/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ハーフデッドリフト",
+    "guideUrl": "https://www.training-manual-bl.com/half-deadlift/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ダンベルデッドリフト",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-deadlift/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "バーベルシュラッグ",
+    "guideUrl": "https://www.training-manual-bl.com/barbell-shrug/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ダンベルシュラッグ",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-shrug/",
+    "bodyPart": "背中"
+  },
+  {
+    "name": "ミリタリープレス",
+    "guideUrl": "https://www.training-manual-bl.com/military-press/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "ショルダープレス（スミスマシン）",
+    "guideUrl": "https://www.training-manual-bl.com/shoulder-press-smith-machine/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "ショルダープレス（ダンベル）",
+    "guideUrl": "https://www.training-manual-bl.com/shoulder-press-dumbbell/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "ショルダープレス（マシン）",
+    "guideUrl": "https://www.training-manual-bl.com/shoulder-press-machine/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "スタンディングアーノルドプレス",
+    "guideUrl": "https://www.training-manual-bl.com/standing-arnold-press/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "フロントレイズ（ダンベル）",
+    "guideUrl": "https://www.training-manual-bl.com/front-raise-dumbbell/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "フロントレイズ（ケーブル）",
+    "guideUrl": "https://www.training-manual-bl.com/front-raise-cable/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "インクラインフロントレイズ",
+    "guideUrl": "https://www.training-manual-bl.com/incline-front-raise/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "サイドレイズ（ダンベル）",
+    "guideUrl": "https://www.training-manual-bl.com/side-raise-dumbbell/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "アップライトロウ",
+    "guideUrl": "https://www.training-manual-bl.com/upright-row/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "アップライトロウ（ケーブル）",
+    "guideUrl": "https://www.training-manual-bl.com/upright-row-cable/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "リアレイズ（ダンベル）",
+    "guideUrl": "https://www.training-manual-bl.com/real-raises-dumbbells/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "リアレイズ（マシン）",
+    "guideUrl": "https://www.training-manual-bl.com/rear-raise-machine/",
+    "bodyPart": "肩"
+  },
+  {
+    "name": "クローズグリップベンチプレス",
+    "guideUrl": "https://www.training-manual-bl.com/close-grip-bench-press/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "ライイングトライセップスエクステンション",
+    "guideUrl": "https://www.training-manual-bl.com/lying-triceps-extension/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "トライセップスプッシュダウン",
+    "guideUrl": "https://www.training-manual-bl.com/triceps-pushdown/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "トライセップスプッシュダウン（ロープ）",
+    "guideUrl": "https://www.training-manual-bl.com/tricep-pushdown-rope/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "ダンベルフレンチプレス",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-french-press/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "トライセップスキックバック",
+    "guideUrl": "https://www.training-manual-bl.com/triceps-kickback/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "ナロープッシュアップ",
+    "guideUrl": "https://www.training-manual-bl.com/narrow-push-up/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "ベンチディップス",
+    "guideUrl": "https://www.training-manual-bl.com/bench-dips/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "アームカール（ダンベル）",
+    "guideUrl": "https://www.training-manual-bl.com/arm-curl-dumbbell/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "インクラインダンベルカール",
+    "guideUrl": "https://www.training-manual-bl.com/incline-dumbbell-curl/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "アームカール（ケーブル）",
+    "guideUrl": "https://www.training-manual-bl.com/arm-curl-cable/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "ハンマーカール",
+    "guideUrl": "https://www.training-manual-bl.com/hammer-curl/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "リバースアームカール（ケーブル）",
+    "guideUrl": "https://www.training-manual-bl.com/reverse-arm-curl-cable/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "リバースアームカール（ダンベル）",
+    "guideUrl": "https://www.training-manual-bl.com/reverse-arm-curl-dumbbell/",
+    "bodyPart": "腕"
+  },
+  {
+    "name": "クランチ",
+    "guideUrl": "https://www.training-manual-bl.com/crunch/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "ケーブルクランチ",
+    "guideUrl": "https://www.training-manual-bl.com/cable-crunch/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "レッグレイズ",
+    "guideUrl": "https://www.training-manual-bl.com/leg-raise/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "レッグレイズ（平行棒）",
+    "guideUrl": "https://www.training-manual-bl.com/leg-raises-parallel-bars/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "ハンギングレッグレイズ",
+    "guideUrl": "https://www.training-manual-bl.com/hanging-leg-raise/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "アブローラー",
+    "guideUrl": "https://www.training-manual-bl.com/ab-roller/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "ロシアンツイスト",
+    "guideUrl": "https://www.training-manual-bl.com/russian-twist/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "ケーブルウッドチョップ",
+    "guideUrl": "https://www.training-manual-bl.com/cable-wood-chop/",
+    "bodyPart": "腹筋"
+  },
+  {
+    "name": "バーベルスクワット",
+    "guideUrl": "https://www.training-manual-bl.com/barbell-squat/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "スミスマシンスクワット",
+    "guideUrl": "https://www.training-manual-bl.com/smith-machine-squat/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "レッグプレス",
+    "guideUrl": "https://www.training-manual-bl.com/leg-press/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "ダンベルランジ",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-lunge/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "ブルガリアンスクワット",
+    "guideUrl": "https://www.training-manual-bl.com/bulgarian-squat/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "レッグエクステンション",
+    "guideUrl": "https://www.training-manual-bl.com/leg-extension/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "ダンベルスクワット",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-squat/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "ライイングレッグカール",
+    "guideUrl": "https://www.training-manual-bl.com/lying-leg-curl/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "ダンベルルーマニアンデッドリフト",
+    "guideUrl": "https://www.training-manual-bl.com/dumbbell-romanian-deadlift/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "スミスマシンワイドスクワット",
+    "guideUrl": "https://www.training-manual-bl.com/smith-machine-wide-squat/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "マシンアダクション",
+    "guideUrl": "https://www.training-manual-bl.com/machine-adduction/",
+    "bodyPart": "脚"
+  },
+  {
+    "name": "ゴブレットスクワット",
+    "guideUrl": "https://www.training-manual-bl.com/goblet-squat/",
+    "bodyPart": "脚"
+  }
 ]

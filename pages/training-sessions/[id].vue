@@ -3,6 +3,7 @@ import {
   matchesExerciseSearch,
   resolveExerciseNameFromInput,
 } from "~/utils/exerciseSearch";
+import { bodyPartCalendarChipStyle } from "~/utils/trainingBodyPartColors";
 
 const exerciseCatalog = useTrainingExerciseCatalog();
 const validNames = computed(() => exerciseCatalog.nameSet.value);
@@ -24,7 +25,6 @@ const session = computed(() => {
   return kintoreSessions.getSession(sessionId.value);
 });
 
-const editing = ref(false);
 const editTitle = ref("");
 const exerciseLines = ref<string[]>([""]);
 const saveHint = ref(false);
@@ -38,7 +38,6 @@ const dropBeforeIndex = ref<number | null>(null);
 const dropAfterIndex = ref<number | null>(null);
 
 function showSaved() {
-  if (!editing.value) return;
   saveHint.value = true;
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
@@ -51,7 +50,7 @@ function exercisesToPersist(lines: string[]) {
 }
 
 async function persistEdit() {
-  if (!editing.value || !sessionId.value) return;
+  if (!sessionId.value) return;
   const res = await kintoreSessions.updateSession(sessionId.value, {
     title: editTitle.value,
     exercises: exercisesToPersist(exerciseLines.value),
@@ -74,43 +73,16 @@ function syncEditorFromSession() {
   exerciseLines.value = stored.length ? [...stored] : [""];
 }
 
-function enterEditMode() {
-  editing.value = true;
-  syncEditorFromSession();
-}
-
-async function flushPersistAndExitEdit() {
-  if (editing.value && sessionId.value) {
-    const res = await kintoreSessions.updateSession(sessionId.value, {
-      title: editTitle.value,
-      exercises: exercisesToPersist(exerciseLines.value),
-    });
-    if (!res.ok) {
-      persistError.value = res.message;
-      return;
-    }
-    persistError.value = null;
-    bumpSession();
-  }
-  editing.value = false;
-  saveHint.value = false;
-}
-
-async function toggleMode() {
-  if (editing.value) await flushPersistAndExitEdit();
-  else enterEditMode();
-}
-
-const viewExercises = computed(() => {
-  const s = session.value;
-  if (!s) return [];
-  return (s.exercises || []).filter((n) => validNames.value.has(n));
-});
-
 function guideUrl(name: string) {
   const n = String(name || "").trim();
   if (!n || !validNames.value.has(n)) return "";
   return exerciseCatalog.guideUrl(n);
+}
+
+/** トレーニング種目一覧・ログと同じ部位チップの色 */
+function bodyPartChipStyleProps(exerciseName: string) {
+  const s = bodyPartCalendarChipStyle(exerciseCatalog.bodyPart(exerciseName));
+  return { background: s.bg, color: s.color };
 }
 
 function addExerciseRow() {
@@ -238,7 +210,6 @@ function clearDropIndicators() {
 }
 
 function onDragStart(i: number, e: DragEvent) {
-  if (!editing.value) return;
   draggedIndex.value = i;
   e.dataTransfer?.setData("text/plain", "session-exercise-row");
   if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
@@ -250,7 +221,7 @@ function onDragEnd() {
 }
 
 function onDragOver(i: number, e: DragEvent) {
-  if (!editing.value || draggedIndex.value == null) return;
+  if (draggedIndex.value == null) return;
   e.preventDefault();
   if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
   const target = (e.currentTarget as HTMLElement).closest(
@@ -266,7 +237,6 @@ function onDragOver(i: number, e: DragEvent) {
 }
 
 function onDropRow(targetIndex: number, e: DragEvent) {
-  if (!editing.value) return;
   e.preventDefault();
   const from = draggedIndex.value;
   clearDropIndicators();
@@ -292,9 +262,22 @@ watch(
     if (!ready.value) return;
     if (!kintoreSessions.getSession(sessionId.value)) {
       await navigateTo("/training-sessions");
+      return;
     }
+    syncEditorFromSession();
   },
   { immediate: true },
+);
+
+/** 種目マスタ読み込み後に、保存済み種目名を正しく反映し直す */
+watch(
+  () => exerciseCatalog.ready.value,
+  (rdy) => {
+    if (!rdy) return;
+    if (!ready.value || !sessionId.value) return;
+    if (!kintoreSessions.getSession(sessionId.value)) return;
+    syncEditorFromSession();
+  },
 );
 
 watch(
@@ -307,39 +290,10 @@ watch(
   { immediate: true },
 );
 
-onMounted(() => {
-  document.addEventListener("visibilitychange", onVis);
-  window.addEventListener("pageshow", onPageShow);
-});
-
 onUnmounted(() => {
   clearComboTimer();
-  document.removeEventListener("visibilitychange", onVis);
-  window.removeEventListener("pageshow", onPageShow);
+  void persistEdit();
 });
-
-watch(editing, (on) => {
-  if (!on) {
-    clearComboTimer();
-    comboOpenIndex.value = null;
-  }
-});
-
-async function onVis() {
-  if (document.visibilityState !== "visible" || editing.value) return;
-  await kintoreSessions.refresh();
-  await exerciseCatalog.refresh();
-  bumpSession();
-}
-
-function onPageShow(e: PageTransitionEvent) {
-  if (e.persisted && !editing.value) {
-    void kintoreSessions
-      .refresh()
-      .then(() => exerciseCatalog.refresh())
-      .then(() => bumpSession());
-  }
-}
 
 async function confirmAndDeleteSession() {
   const s = session.value;
@@ -371,78 +325,20 @@ async function confirmAndDeleteSession() {
     v-if="session"
     id="session-main"
     class="main"
-    :class="{ 'session-detail--editing': editing }"
   >
     <div class="sessions-detail-toolbar">
       <NuxtLink to="/training-sessions" class="sessions-back-btn">
         <span class="sessions-back-btn__mark" aria-hidden="true">＜</span>戻る
       </NuxtLink>
-      <button
-        id="session-mode-btn"
-        type="button"
-        class="session-mode-btn"
-        :aria-pressed="editing ? 'true' : 'false'"
-        aria-controls="session-edit-panel"
-        @click="toggleMode"
-      >
-        {{ editing ? "閲覧に戻る" : "編集" }}
-      </button>
     </div>
 
     <div
-      v-show="!editing"
-      id="session-view-panel"
-      class="session-view-panel"
-    >
-      <h1 id="session-view-title" class="session-view-title">
-        {{ session.title }}
-      </h1>
-
-      <section class="card" aria-labelledby="session-view-ex-heading">
-        <h2 id="session-view-ex-heading" class="section-title">
-          トレーニング種目
-        </h2>
-        <ul
-          v-show="viewExercises.length > 0"
-          id="session-view-exercises"
-          class="session-view-exercises"
-        >
-          <li
-            v-for="name in viewExercises"
-            :key="name"
-            class="session-view-exercise-item"
-          >
-            <div class="session-view-exercise-head">
-              <span class="session-view-exercise-name">{{ name }}</span>
-              <span class="bodypart-tag session-view-bodypart">{{
-                exerciseCatalog.bodyPart(name)
-              }}</span>
-            </div>
-            <a
-              v-if="guideUrl(name)"
-              :href="guideUrl(name)"
-              class="session-view-guide-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >解説ページを開く</a>
-            <span v-else class="session-view-muted">解説リンクなし</span>
-          </li>
-        </ul>
-        <p
-          v-show="viewExercises.length === 0"
-          id="session-view-exercises-empty"
-          class="session-view-empty"
-        >
-          登録された種目はありません
-        </p>
-      </section>
-    </div>
-
-    <div
-      v-show="editing"
       id="session-edit-panel"
       class="session-edit-panel"
     >
+      <h1 class="session-view-title">
+        {{ editTitle.trim() || session.title }}
+      </h1>
       <p class="session-edit-lead">変更は入力のたびに自動保存されます。</p>
 
       <div id="session-title-field" class="field">
@@ -570,7 +466,8 @@ async function confirmAndDeleteSession() {
             </div>
             <span
               v-if="line && validNames.has(line)"
-              class="bodypart-tag session-exercise-bodypart"
+              class="training-bodypart-chip training-bodypart-chip--log session-exercise-bodypart-chip"
+              :style="bodyPartChipStyleProps(line)"
             >{{ exerciseCatalog.bodyPart(line) }}</span>
             <div
               v-if="!line || !validNames.has(line)"
@@ -633,4 +530,5 @@ async function confirmAndDeleteSession() {
 
 <style>
 @import "~/assets/css/sessions.css";
+@import "~/assets/css/training.css";
 </style>

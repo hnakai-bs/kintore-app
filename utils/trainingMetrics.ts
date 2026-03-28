@@ -39,6 +39,22 @@ export function countTrainingSetsInMonth(
   return total;
 }
 
+/** 指定月に reps ありのセットが1件以上ある日の数（同日複数セットでも1日として数える） */
+export function countTrainingDaysInMonth(
+  byDay: Record<string, unknown[]>,
+  year: number,
+  month: number,
+): number {
+  const prefix = `${year}-${String(month).padStart(2, "0")}-`;
+  let days = 0;
+  for (const [dateYmd, sets] of Object.entries(byDay)) {
+    if (!dateYmd.startsWith(prefix)) continue;
+    if (!Array.isArray(sets)) continue;
+    if (sets.some((row) => hasTrainingSetLogged(row))) days++;
+  }
+  return days;
+}
+
 /** 月内の「reps ありセット」を部位ごとに集計（件数降順）。種目空欄は「種目未入力」。 */
 export function bodyPartSetCountsForMonth(
   byDay: Record<string, unknown[]>,

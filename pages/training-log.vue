@@ -1,33 +1,12 @@
 <script setup lang="ts">
 import {
   bodyPartSetCountsForMonth,
-  countTrainingSetsInMonth,
+  countTrainingDaysInMonth,
 } from "~/utils/trainingMetrics";
+import { bodyPartLabelForExerciseName } from "~/utils/trainingExerciseBodyParts";
+import { bodyPartCalendarChipStyle } from "~/utils/trainingBodyPartColors";
 
 const exerciseCatalog = useTrainingExerciseCatalog();
-const exerciseNamesList = computed(() => exerciseCatalog.names.value);
-
-const EXERCISE_CHIP_STYLES = [
-  { bg: "#e8f0fe", color: "#1967d2" },
-  { bg: "#e6f4ea", color: "#137333" },
-  { bg: "#fef7e0", color: "#b06000" },
-  { bg: "#f3e8fd", color: "#7c2f9f" },
-  { bg: "#fce8e6", color: "#c5221f" },
-];
-
-const EXERCISE_CHIP_STYLES_DARK = [
-  { bg: "rgba(138, 180, 248, 0.22)", color: "#8ab4f8" },
-  { bg: "rgba(129, 201, 149, 0.22)", color: "#81c995" },
-  { bg: "rgba(253, 212, 129, 0.2)", color: "#fdd663" },
-  { bg: "rgba(197, 134, 252, 0.22)", color: "#c5a8fc" },
-  { bg: "rgba(242, 139, 130, 0.22)", color: "#f28b82" },
-];
-
-const { isDark: userThemeIsDark } = useUserTheme();
-
-const exerciseChipPalette = computed(() =>
-  userThemeIsDark.value ? EXERCISE_CHIP_STYLES_DARK : EXERCISE_CHIP_STYLES,
-);
 
 function ymd(d: Date) {
   const y = d.getFullYear();
@@ -78,7 +57,13 @@ function hasRepsEntered(row: unknown) {
   return Number.isFinite(n);
 }
 
-function topDistinctExercises(
+/** その日のログから、最大3部位まで（登場順・reps ありのみ） */
+function bodyPartChipInlineStyle(part: string) {
+  const s = bodyPartCalendarChipStyle(part);
+  return { background: s.bg, color: s.color };
+}
+
+function topDistinctBodyParts(
   key: string,
   entries: Record<string, unknown[]>,
 ) {
@@ -89,20 +74,13 @@ function topDistinctExercises(
   for (const row of raw) {
     if (!hasRepsEntered(row)) continue;
     const ex = normalizeExercise((row as { exercise?: unknown }).exercise);
-    if (!ex) continue;
-    if (seen.has(ex)) continue;
-    seen.add(ex);
-    out.push(ex);
+    const part = bodyPartLabelForExerciseName(ex);
+    if (seen.has(part)) continue;
+    seen.add(part);
+    out.push(part);
     if (out.length >= 3) break;
   }
   return out;
-}
-
-function chipStyle(name: string) {
-  const i = exerciseNamesList.value.indexOf(name);
-  const idx = i >= 0 ? i : 0;
-  const palette = exerciseChipPalette.value;
-  return palette[idx % palette.length];
 }
 
 useHead({ title: "トレーニングログ" });
@@ -151,10 +129,10 @@ const bodyPartSlices = computed(() => {
   );
 });
 
-const trainingSetCountMonth = computed(() => {
+const trainingDaysInMonth = computed(() => {
   tick.value;
   const vm = viewMonth.value;
-  return countTrainingSetsInMonth(
+  return countTrainingDaysInMonth(
     entries.value,
     vm.getFullYear(),
     vm.getMonth() + 1,
@@ -193,7 +171,7 @@ const cells = computed((): Cell[] => {
       dayNum: day,
       muted: true,
       isToday: ymd(d) === todayKey,
-      chips: topDistinctExercises(ymd(d), e),
+      chips: topDistinctBodyParts(ymd(d), e),
     });
   }
 
@@ -206,7 +184,7 @@ const cells = computed((): Cell[] => {
       dayNum: day,
       muted: false,
       isToday: key === todayKey,
-      chips: topDistinctExercises(key, e),
+      chips: topDistinctBodyParts(key, e),
     });
   }
 
@@ -222,7 +200,7 @@ const cells = computed((): Cell[] => {
       dayNum: day,
       muted: true,
       isToday: key === todayKey,
-      chips: topDistinctExercises(key, e),
+      chips: topDistinctBodyParts(key, e),
     });
   }
 
@@ -391,31 +369,28 @@ async function onVisibility() {
           <span class="tl-cell__num">{{ c.dayNum }}</span>
           <div class="tl-cell__chips">
             <span
-              v-for="name in c.chips"
-              :key="name"
-              class="tl-chip"
-              :style="{
-                background: chipStyle(name).bg,
-                color: chipStyle(name).color,
-              }"
-            >{{ name }}</span>
+              v-for="part in c.chips"
+              :key="part"
+              class="tl-chip tl-chip--bodypart"
+              :style="bodyPartChipInlineStyle(part)"
+            >{{ part }}</span>
           </div>
         </NuxtLink>
       </div>
     </div>
 
     <div
-      v-if="trainingSetCountMonth > 0"
+      v-if="trainingDaysInMonth > 0"
       class="tl-bodypart-section"
     >
       <p class="admin-training-summary" role="status">
         <span class="admin-training-summary__label">
-          {{ monthTitle }}のトレーニング回数
+          {{ monthTitle }}のトレーニング日数
         </span>
         <span class="admin-training-summary__num">{{
-          trainingSetCountMonth
+          trainingDaysInMonth
         }}</span>
-        <span class="admin-training-summary__unit">回</span>
+        <span class="admin-training-summary__unit">日</span>
       </p>
       <AdminTrainingExercisePie
         v-if="bodyPartSlices.length > 0"

@@ -30,7 +30,7 @@ onBeforeUnmount(() => {
       <NuxtLink
         to="/"
         class="site-logo"
-        aria-label="ホーム（DAIKI Fit）"
+        aria-label="ホーム（RE-BIRTH）"
         :prefetch="false"
       >
         <span class="site-logo__mark" aria-hidden="true">
@@ -43,7 +43,7 @@ onBeforeUnmount(() => {
             decoding="async"
           />
         </span>
-        <span class="site-logo__text">DAIKI Fit</span>
+        <span class="site-logo__text">RE-BIRTH</span>
       </NuxtLink>
     </header>
     <slot />
