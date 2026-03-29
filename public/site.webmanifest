@@ -1,0 +1,16 @@
+{
+  "name": "RE-BIRTH",
+  "short_name": "RE-BIRTH",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/daiki-fit_2.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
