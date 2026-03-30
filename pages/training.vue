@@ -919,8 +919,6 @@ onUnmounted(() => {
               v-else
               :href="exerciseGuideUrl(detailBlock.name)!"
               class="training-set__guide-link"
-              target="_blank"
-              rel="noopener noreferrer"
             >フォーム解説</a>
           </div>
           <div

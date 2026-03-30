@@ -336,11 +336,6 @@ async function confirmAndDeleteSession() {
       id="session-edit-panel"
       class="session-edit-panel"
     >
-      <h1 class="session-view-title">
-        {{ editTitle.trim() || session.title }}
-      </h1>
-      <p class="session-edit-lead">変更は入力のたびに自動保存されます。</p>
-
       <div id="session-title-field" class="field">
         <label class="session-field-label" for="session-title-custom">セッション名</label>
         <input
@@ -483,8 +478,6 @@ async function confirmAndDeleteSession() {
               <a
                 :href="guideUrl(line)"
                 class="session-exercise-guide-link"
-                target="_blank"
-                rel="noopener noreferrer"
               >解説ページを開く</a>
             </div>
           </div>

@@ -16,7 +16,7 @@ const trainingBackTo = computed(() => ({
 }));
 
 useHead(() => ({
-  title: pickMode.value ? "種目を追加" : "種目一覧（部位別）",
+  title: pickMode.value ? "RE-BIRTH" : "種目一覧（部位別）",
 }));
 
 /** テンプレートでは catalog.xxx と書くと ref がアンラップされず常に truthy になるため、ref をトップレベルで使う */
@@ -26,6 +26,7 @@ const {
   loadError,
   refresh: reloadExerciseCatalog,
   isValidName,
+  guideUrl,
 } = useTrainingExerciseCatalog();
 const { user } = useFirebaseAuth();
 const { getDay, saveDay } = useTrainingFirestore();
@@ -121,11 +122,8 @@ onUnmounted(() => {
       </NuxtLink>
     </div>
 
-    <h1
-      class="exercises-by-part-page__title"
-      :class="{ 'exercises-by-part-page__title--pick': pickMode }"
-    >
-      {{ pickMode ? "種目を追加" : "トレーニング種目一覧" }}
+    <h1 v-if="!pickMode" class="exercises-by-part-page__title">
+      トレーニング種目一覧
     </h1>
     <p v-if="!pickMode" class="exercises-by-part-page__lead">
       Firestore に登録された種目を、<strong>部位ごと</strong>に分けて表示しています。
@@ -180,7 +178,6 @@ onUnmounted(() => {
             :aria-labelledby="`ex-part-${gi}`"
           >
             <h2 :id="`ex-part-${gi}`" class="exercises-by-part-block__heading">
-              <span class="exercises-by-part-block__label">部位</span>
               <span class="exercises-by-part-block__name">{{ g.part }}</span>
               <span class="exercises-by-part-block__count">{{ g.names.length }} 種目</span>
             </h2>
@@ -190,6 +187,16 @@ onUnmounted(() => {
                 :key="`${g.part}-${name}-${ni}`"
                 class="exercises-by-part-block__li"
               >
+                <div class="exercises-by-part-block__body">
+                  <span class="exercises-by-part-block__exercise-name">{{ name }}</span>
+                  <a
+                    v-if="guideUrl(name)"
+                    class="exercises-by-part-block__guide-link"
+                    :href="guideUrl(name)"
+                  >
+                    フォーム解説
+                  </a>
+                </div>
                 <button
                   v-if="pickMode && pickDateYmd"
                   type="button"
@@ -197,12 +204,8 @@ onUnmounted(() => {
                   :disabled="pickBusy || !user"
                   @click="onPickExercise(name)"
                 >
-                  <span class="exercises-by-part-block__exercise-name">{{ name }}</span>
-                  <span class="exercises-by-part-block__pick-hint" aria-hidden="true">追加</span>
+                  追加
                 </button>
-                <template v-else>
-                  <span class="exercises-by-part-block__exercise-name">{{ name }}</span>
-                </template>
               </li>
             </ol>
           </section>
@@ -236,10 +239,6 @@ onUnmounted(() => {
   color: var(--text);
 }
 
-.exercises-by-part-page__title--pick {
-  margin-bottom: 16px;
-}
-
 .exercises-by-part-page__lead {
   margin: 0 0 20px;
   font-size: 0.875rem;
@@ -269,11 +268,10 @@ onUnmounted(() => {
 }
 
 .exercises-by-part-block__heading {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  align-items: baseline;
-  gap: 2px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin: 0;
   padding: 12px 14px 10px;
   background: var(--surface-pressed);
@@ -281,31 +279,12 @@ onUnmounted(() => {
   font: inherit;
 }
 
-.exercises-by-part-block__heading .exercises-by-part-block__label {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.exercises-by-part-block__heading .exercises-by-part-block__name {
-  grid-column: 1;
-  grid-row: 2;
-}
-
 .exercises-by-part-block__count {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
+  flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-muted);
   white-space: nowrap;
-}
-
-.exercises-by-part-block__label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
 }
 
 .exercises-by-part-block__name {
@@ -322,7 +301,8 @@ onUnmounted(() => {
 
 .exercises-by-part-block__li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
   margin: 0;
   padding: 12px 14px;
@@ -333,21 +313,42 @@ onUnmounted(() => {
   line-height: 1.45;
 }
 
-.exercises-by-part-block__pick-btn {
+.exercises-by-part-block__body {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   min-width: 0;
-  margin: -12px -14px;
-  padding: 12px 14px;
-  border: none;
-  background: transparent;
-  font: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  color: inherit;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.exercises-by-part-block__guide-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.exercises-by-part-block__guide-link:hover {
+  text-decoration-thickness: 0.08em;
+}
+
+.exercises-by-part-block__pick-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1em;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -362,29 +363,13 @@ onUnmounted(() => {
   background: var(--surface-pressed);
 }
 
-.exercises-by-part-block__pick-hint {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 12px;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-  pointer-events: none;
-}
-
 .exercises-by-part-block__li:last-child {
   border-bottom: none;
 }
 
 .exercises-by-part-block__exercise-name {
-  flex: 1;
+  display: block;
+  width: 100%;
   min-width: 0;
   padding-top: 0.05em;
 }

@@ -14,28 +14,11 @@
   flex-wrap: wrap;
 }
 
-.session-edit-lead {
-  margin: 0 0 16px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--text-muted);
-}
-
 /* トレーニング記録の種目一覧と同系の部位チップ（色は inline） */
 .session-exercise-row .session-exercise-bodypart-chip {
   margin: 8px 0 0;
   align-self: flex-start;
   max-width: 100%;
-}
-
-.session-view-title {
-  margin: 0 0 18px;
-  font-size: 1.375rem;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  color: var(--text);
 }
 
 .session-view-exercises {
